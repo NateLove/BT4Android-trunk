@@ -3,6 +3,22 @@ BT4Android
 
 Android app for finding times of the Blacksburg Transit System
 
+Set Up
+======
+
+This app relies on the ActionBarSherlock Library to use the newer Android 
+style guides for Android versions lower than 3.0.
+
+I use Eclipse, so that is how I set this up. If you want to set it up 
+differently that is up to you, but please don't attempt to push changes to 
+ActionBarSherlock. 
+
+If you are using Eclipse, import both Bt4android folder and ActionBarSherlock 
+as Android applications. BT4Android can't be built if ActionBarSherlock is not 
+also present. It should work from there, but sometimes it can act strangely 
+depending on what version of Android you try to build it from. I usually use 4.1.
+
+Any questions, just let me know. ngl9789@gmail.com
 
 License
 =======
