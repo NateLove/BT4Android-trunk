@@ -48,7 +48,6 @@ public class BT4Android extends SherlockFragmentActivity {
 		setContentView(R.layout.fragment_tabs_pager);
 		mTabHost = (TabHost)findViewById(android.R.id.tabhost);
 		mTabHost.setup();
-		createAd();
 		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
 		mViewPager = (ViewPager)findViewById(R.id.pager);
 		mTabsAdapter = new TabsAdapter(this, mTabHost, mViewPager);
@@ -66,32 +65,6 @@ public class BT4Android extends SherlockFragmentActivity {
 			mTabHost.setCurrentTabByTag(savedInstanceState.getString("tab"));
 		}
 
-	}
-
-	private void createAd() {
-		layout = (RelativeLayout) findViewById(R.id.adLayout);
-		act = this;  
-		final String addNumber = "420205720";
-		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-		loaded = settings.getInt("timesLoaded", 10);
-		loaded++;
-		Log.i("BT4Android" , loaded + " ");
-		if(loaded  >= 15)
-		{
-			loaded = 0;
-			layout.post(new Runnable() { 
-				public void run() { 
-					myController = new AdController(act, addNumber);
-					myController.loadAd(); 
-				} 
-			}); 	
-		} 
-
-		SharedPreferences.Editor editor = settings.edit();
-		editor.putInt("timesLoaded", loaded);
-		// Commit the edits!
-		editor.commit();
-		
 	}
 
 	private void setupGoogleAnalytics() {
