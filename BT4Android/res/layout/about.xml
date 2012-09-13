@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:ads="http://schemas.android.com/apk/lib/com.google.ads"
+  android:orientation="vertical"
+  android:layout_width="fill_parent"
+  android:layout_height="fill_parent" android:weightSum="1" android:background="#FF9900">
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="135dp"
+        android:background="@drawable/logo" >
+</TextView>
+    <TextView android:id="@+id/textView1" android:layout_width="fill_parent" android:text="Welcome! This is the about page." android:layout_height="wrap_content" android:layout_weight="0.05" android:textColor="#660000"></TextView>
+    <TextView android:layout_height="wrap_content" android:text="This app is designed to retrieve bus data from the newly designed BT4U website. This data comes directly from the Blacksburg Transit System, and it is as acurate as possible. However, it is not always exactly correct, so don't blame me if you're late for school." android:id="@+id/textView3" android:layout_width="fill_parent" android:layout_weight="0.07" android:textColor="#660000"></TextView>
+    <TextView android:layout_height="wrap_content" android:id="@+id/textView4" android:layout_weight="0.43" android:layout_width="fill_parent" android:textColor="#660000" android:text="To use this app, simply choose the bus you want to ride and and the stop you want to get on at and it will give you the next three arrival times. You may have noticed some four digit numbers at your bus stop recently, those are stop codes and when choosing a stop those are the numbers that procede the actual stop location. To add a stop to your favorites simply choose the stop you want and then click the menu button and choose add to favorites."></TextView>
+    
+</LinearLayout>
+
+			

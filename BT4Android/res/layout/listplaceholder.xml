@@ -1,0 +1,110 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/orange"
+    android:orientation="vertical"
+    android:tag="BT4U"
+    android:weightSum="1" >
+
+    <LinearLayout
+        android:id="@+id/LinearLayout03"
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:background="@drawable/maroon"
+        android:orientation="vertical" >
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout3"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="vertical"
+        android:weightSum="1" >
+
+        <FrameLayout
+            android:id="@+id/frameLayout1"
+            android:layout_width="229dp"
+            android:layout_height="86dp"
+            android:background="@drawable/logo" >
+        </FrameLayout>
+
+        <LinearLayout
+            android:id="@+id/LinearLayout02"
+            android:layout_width="fill_parent"
+            android:layout_height="2dp"
+            android:background="@drawable/maroon"
+            android:orientation="vertical" >
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout5"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="1" >
+
+            <TextView
+                android:id="@+id/textView1"
+                android:layout_width="wrap_content"
+                android:layout_height="52dp"
+                android:gravity="center_vertical|center_horizontal|center"
+                android:text="Route Name: "
+                android:textColor="#330000" >
+            </TextView>
+
+            <Spinner
+                android:id="@+id/spinner1"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1" >
+            </Spinner>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout6"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" >
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="52dp"
+                android:gravity="center_vertical|center_horizontal|center"
+                android:text="Stop Name:   "
+                android:textColor="#330000" >
+            </TextView>
+
+            <Spinner
+                android:id="@+id/spinner2"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1" >
+            </Spinner>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/LinearLayout01"
+            android:layout_width="fill_parent"
+            android:layout_height="2dp"
+            android:background="@drawable/maroon"
+            android:orientation="vertical" >
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:maxLines="20"
+            android:scrollbars="vertical"
+            android:text="     "
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="#330000" >
+        </TextView>
+    </LinearLayout>
+
+    <ListView
+        android:id="@id/android:list"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:drawSelectorOnTop="false" />
+
+</LinearLayout>
