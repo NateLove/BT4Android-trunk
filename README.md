@@ -3,6 +3,7 @@ BT4Android
 
 Android app for finding times of the Blacksburg Transit System
 
+Play Store Link: https://play.google.com/store/apps/details?id=com.love.apps.BT4U
 Set Up
 ======
 
