@@ -5,6 +5,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -19,14 +20,22 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.love.qsort.MyQsort;
@@ -38,7 +47,7 @@ public class Updates extends SherlockFragment
 		super.onCreate(savedInstanceState);
 	}
 
-	private ArrayAdapter<String> theAdapter;
+	private BTUpdateArrayAdapter theAdapter;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -47,7 +56,7 @@ public class Updates extends SherlockFragment
 		
 		final View v = inflater.inflate(R.layout.activity_btupdates, container, false);
 		ListView lv = (ListView)v.findViewById(R.id.btupdates_list);
-		theAdapter = new ArrayAdapter<String>(this.getActivity().getBaseContext(),android.R.layout.simple_list_item_1);
+		theAdapter = new BTUpdateArrayAdapter(this.getActivity().getBaseContext(),android.R.layout.simple_list_item_1);
 		lv.setAdapter(theAdapter);
 		UpdatesGetter updates_getter = new UpdatesGetter();
 		updates_getter.execute("http://www.blacksburg.gov/rss.aspx?type=5&cat=17&paramtime=Current");
@@ -92,7 +101,7 @@ public class Updates extends SherlockFragment
 					SAXParserFactory factory = SAXParserFactory.newInstance();
 					SAXParser saxParser = factory.newSAXParser();
 					DefaultHandler handler = new DefaultHandler(){
-						String[] data = {"","",""};
+						String[] data = {"","","",""};
 						
 						int index = -1;
 						
@@ -100,7 +109,7 @@ public class Updates extends SherlockFragment
 				                org.xml.sax.Attributes attributes) throws SAXException {
 							if (qName.equals("item"))
 							{
-								data = new String[3];
+								data = new String[4];
 								for (int i=0; i<data.length; i++)
 								{
 									data[i] = "";
@@ -119,6 +128,10 @@ public class Updates extends SherlockFragment
 							{
 								index = 2;
 							}
+							else if (qName.equals("link"))
+							{
+								index = 3;
+							}
 							else 
 							{
 								index = -1;
@@ -128,9 +141,12 @@ public class Updates extends SherlockFragment
 						{
 							if (qName.equals("item"))
 							{
-								String message = data[0]+": "+data[2];
-								message = message.replace("&nbsp;", " ");
-								Updates.this.theAdapter.add(message);
+								for (int i=0; i<data.length;i++)
+								{
+									data[i] = data[i].replace("&nbsp;", " ");
+								}
+								Updates.this.theAdapter.add(new NewsItem(data[0],data[1],data[2],data[3]));
+								Log.d("Parser","Added a newsitem");
 								index = -1;
 							}
 						}
@@ -154,6 +170,101 @@ public class Updates extends SherlockFragment
 		private void log(String string) {
 			// TODO Auto-generated method stub
 			
+		}
+	}
+	public class NewsItem
+	{
+		public String title;
+		public String pubDate;
+		public String description;
+		public String link;
+		public NewsItem(String title, String pubDate, String description, String link)
+		{
+			this.title = title;
+			this.pubDate = pubDate;
+			this.description = description;
+			this.link = link;
+		}
+	}
+	public class BTUpdateArrayAdapter extends BaseAdapter
+	{
+
+		ArrayList<NewsItem> items;
+		long id;
+		public BTUpdateArrayAdapter(Context context, int textViewResourceId) {
+			super();
+			items = new ArrayList<NewsItem>();
+			id = textViewResourceId;
+		}
+		
+		public void add(NewsItem ni)
+		{
+			items.add(ni);
+			Log.d("Adapter","size: "+items.size());
+			this.notifyDataSetChanged();
+		}
+
+		@Override
+		public int getCount() {
+			Log.d("Adapter","getCount: "+items.size());
+			return items.size();
+		}
+
+		@Override
+		public Object getItem(int arg0) {
+			return items.get(arg0);
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return id;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			if (convertView == null)
+			{
+				TextView theView = new TextView(Updates.this.getActivity().getBaseContext());
+				theView.setText(items.get(position).title);
+				theView.setMinHeight(50);
+				final int index = position;
+				theView.setOnClickListener(new OnClickListener(){
+
+					@Override
+					public void onClick(View view) {
+						AlertDialog.Builder builder = new AlertDialog.Builder(Updates.this.getActivity());
+						builder.setTitle(items.get(index).title)
+								.setMessage(items.get(index).description)
+								.setPositiveButton("Read on BT's site", new DialogInterface.OnClickListener(){
+
+									@Override
+									public void onClick(DialogInterface dialog,
+											int which) {
+										Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(items.get(index).link));
+										Updates.this.getActivity().startActivity(intent);
+									}
+									
+								})
+								.setNegativeButton("Close", new DialogInterface.OnClickListener(){
+
+									@Override
+									public void onClick(DialogInterface dialog,
+											int which) {
+										dialog.dismiss();
+									}
+									
+								});
+						builder.show();
+					}
+					
+				});
+				return theView;
+			}
+			else
+			{
+				((TextView)convertView).setText(items.get(position).title);
+				return convertView;
+			}
 		}
 	}
 }
