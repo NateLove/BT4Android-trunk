@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -313,8 +316,23 @@ public class Routes extends SherlockFragment {
 					if(name.equalsIgnoreCase("adjusteddeparturetime"))
 					{
 						xpp.next();
-						temp += "\t\t\t" + xpp.getText().split(" ")[1] + " " + xpp.getText().split(" ")[2] + "\n";	
+						temp += "\t\t\t" + xpp.getText().split(" ")[1] + " " + xpp.getText().split(" ")[2];	
 						Log.i("INFO", xpp.getText());
+						SimpleDateFormat sdf = new SimpleDateFormat();
+						sdf.applyPattern("M/d/y h:m:s a");
+						
+						
+						try {
+							Date arrival = sdf.parse(xpp.getText());
+							Log.d("INFO",arrival.toLocaleString());
+							long msuntil = arrival.getTime() - System.currentTimeMillis();
+							long hours   = msuntil/(60*60*1000);
+							long minutes = msuntil/(60*1000);
+							temp+="\t\t"+(hours>0?hours+"h":"")+" "+(hours==0 && minutes==0?"Now":minutes+"m");
+						} catch (ParseException e) {
+							e.printStackTrace();
+						}
+						temp+="\n";
 						i++;
 					}
 				} else if(eventType == XmlPullParser.END_DOCUMENT) {
