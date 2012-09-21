@@ -7,7 +7,9 @@
     <ListView
         android:id="@+id/btupdates_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:background="#ff9900" >
+
     </ListView>
 
 </LinearLayout>

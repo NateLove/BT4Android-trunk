@@ -99,15 +99,18 @@
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="#330000" >
         </TextView> -->
+
         <TextView
-            android:text="Departures"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            />
+            android:text="Departures"
+            android:textColor="#330000" />
+
         <ListView 
             android:id="@+id/arrivals_list"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
+            style="@style/List_font"
             />
     </LinearLayout>
 

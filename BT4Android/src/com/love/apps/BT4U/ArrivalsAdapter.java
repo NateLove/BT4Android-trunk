@@ -37,23 +37,19 @@ public class ArrivalsAdapter extends BaseAdapter
 		
 	}
 
-	@Override
 	public int getCount() {
 		
 		return arrivals.size();
 	}
 
-	@Override
 	public Object getItem(int arg0) {
 		return arrivals.get(arg0);
 	}
 
-	@Override
 	public long getItemId(int position) {
 		return id;
 	}
 
-	@Override
 	public View getView(int position, View convertView, ViewGroup parent) {
 		//if (convertView == null)
 		{
@@ -71,7 +67,6 @@ public class ArrivalsAdapter extends BaseAdapter
 				final int index = position;
 				theView.setOnClickListener(new OnClickListener(){
 	
-					@Override
 					public void onClick(View arg0) {
 						
 						AlertDialog.Builder builder = new AlertDialog.Builder(m_context);

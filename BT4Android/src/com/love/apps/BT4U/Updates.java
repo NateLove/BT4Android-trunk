@@ -42,21 +42,21 @@ import com.love.qsort.MyQsort;
 
 public class Updates extends SherlockFragment 
 {
-	@Override
+	 
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 	}
 
 	private BTUpdateArrayAdapter theAdapter;
 
-	@Override
+	 
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {		
 		super.onCreateView(inflater, container, savedInstanceState);
 		
 		final View v = inflater.inflate(R.layout.activity_btupdates, container, false);
 		ListView lv = (ListView)v.findViewById(R.id.btupdates_list);
-		theAdapter = new BTUpdateArrayAdapter(this.getActivity().getBaseContext(),android.R.layout.simple_list_item_1);
+		theAdapter = new BTUpdateArrayAdapter(this.getActivity().getBaseContext(),android.R.layout.simple_list_item_1);	
 		lv.setAdapter(theAdapter);
 		UpdatesGetter updates_getter = new UpdatesGetter();
 		updates_getter.execute("http://www.blacksburg.gov/rss.aspx?type=5&cat=17&paramtime=Current");
@@ -65,7 +65,7 @@ public class Updates extends SherlockFragment
 	
 	class UpdatesGetter extends AsyncTask<String, Integer, String>{
 
-		@Override
+		 
 		protected String doInBackground(String... params) {
 
 			try {
@@ -90,7 +90,7 @@ public class Updates extends SherlockFragment
 		}
 		private String resultsSoFar = "";
 		
-		@Override
+		 
 		protected void onPostExecute(String result) {
 			resultsSoFar = resultsSoFar + result;
 			
@@ -169,7 +169,7 @@ public class Updates extends SherlockFragment
 
 		private void log(String string) {
 			// TODO Auto-generated method stub
-			
+			Log.i("Updates.java", string);
 		}
 	}
 	public class NewsItem
@@ -193,6 +193,7 @@ public class Updates extends SherlockFragment
 		long id;
 		public BTUpdateArrayAdapter(Context context, int textViewResourceId) {
 			super();
+			
 			items = new ArrayList<NewsItem>();
 			id = textViewResourceId;
 		}
@@ -204,40 +205,41 @@ public class Updates extends SherlockFragment
 			this.notifyDataSetChanged();
 		}
 
-		@Override
+		 
 		public int getCount() {
 			Log.d("Adapter","getCount: "+items.size());
 			return items.size();
 		}
 
-		@Override
+		 
 		public Object getItem(int arg0) {
 			return items.get(arg0);
 		}
 
-		@Override
+		 
 		public long getItemId(int position) {
 			return id;
 		}
 
-		@Override
+		 
 		public View getView(int position, View convertView, ViewGroup parent) {
 			if (convertView == null)
 			{
 				TextView theView = new TextView(Updates.this.getActivity().getBaseContext());
+				theView.setTextColor(0xff330000);
 				theView.setText(items.get(position).title);
 				theView.setMinHeight(50);
 				final int index = position;
 				theView.setOnClickListener(new OnClickListener(){
 
-					@Override
+					 
 					public void onClick(View view) {
 						AlertDialog.Builder builder = new AlertDialog.Builder(Updates.this.getActivity());
 						builder.setTitle(items.get(index).title)
 								.setMessage(items.get(index).description)
 								.setPositiveButton("Read on BT's site", new DialogInterface.OnClickListener(){
 
-									@Override
+									 
 									public void onClick(DialogInterface dialog,
 											int which) {
 										Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(items.get(index).link));
@@ -247,7 +249,7 @@ public class Updates extends SherlockFragment
 								})
 								.setNegativeButton("Close", new DialogInterface.OnClickListener(){
 
-									@Override
+									 
 									public void onClick(DialogInterface dialog,
 											int which) {
 										dialog.dismiss();
