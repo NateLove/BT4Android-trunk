@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,6 +44,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -69,6 +73,7 @@ public class Routes extends SherlockFragment {
 	private volatile ProgressDialog pd;
 	static boolean isLoggingEnabled = true;
 	private Favorites favorites_ = new Favorites();
+	private ArrivalsAdapter arrivals_list_adapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -89,12 +94,17 @@ public class Routes extends SherlockFragment {
 				"Loading Routes. Please wait...", true);
 
 		//set up gui elements
-		RouteInfoTextView= (TextView) v.findViewById(R.id.textView2);
+		//RouteInfoTextView= (TextView) v.findViewById(R.id.textView2);
+		arrivals_list_adapter = new ArrivalsAdapter(this.getActivity());
+		ListView lv = (ListView) v.findViewById(R.id.arrivals_list);
+		lv.setAdapter(arrivals_list_adapter);
+		
 		RouteInfoSpinner = (Spinner) v.findViewById(R.id.spinner1);									
 		StopNameSpinner = (Spinner) v.findViewById(R.id.spinner2);
 		RouteInfoSpinner.setBackgroundResource(R.drawable.back);
 		StopNameSpinner.setBackgroundResource(R.drawable.back);
-		RouteInfoTextView.setMovementMethod(new ScrollingMovementMethod());
+		//RouteInfoTextView.setMovementMethod(new ScrollingMovementMethod());
+		
 		array_spinner = new String[15];
 
 		// Restore preferences
@@ -119,7 +129,7 @@ public class Routes extends SherlockFragment {
 
 				if(RouteInfoSpinner.getSelectedItem().equals("---Select---"))
 				{
-					RouteInfoTextView.setText("");
+					//RouteInfoTextView.setText("");
 					StopNameSpinner.setClickable(false);
 					String[] routes = new String[10];
 					routes[0] = "---Select---";
@@ -182,7 +192,7 @@ public class Routes extends SherlockFragment {
 					if(addFavItem != null)
 						addFavItem.setVisible(false);
 				}
-				RouteInfoTextView.setText("");
+				//RouteInfoTextView.setText("");
 			}
 
 			public void onNothingSelected(AdapterView<?> arg0) {
@@ -289,6 +299,7 @@ public class Routes extends SherlockFragment {
 				RouteInfoTextView.setTextSize(17);
 				RouteInfoTextView.setText(result);
 			}
+			Routes.this.arrivals_list_adapter.notifyDataSetChanged();
 		}
 
 		public String printXml(String xml) throws XmlPullParserException, IOException, InterruptedException
@@ -313,9 +324,19 @@ public class Routes extends SherlockFragment {
 					if(name.equalsIgnoreCase("adjusteddeparturetime"))
 					{
 						xpp.next();
-						temp += "\t\t\t" + xpp.getText().split(" ")[1] + " " + xpp.getText().split(" ")[2] + "\n";	
+						temp += "\t\t\t" + xpp.getText().split(" ")[1] + " " + xpp.getText().split(" ")[2];	
 						Log.i("INFO", xpp.getText());
+						
+						Arrival arrival = new Arrival(xpp.getText());
+						arrivals_list_adapter.add(arrival);
+						temp+="\t\t"+arrival.timeUntil();
+						
+						temp+="\n";
 						i++;
+					}else if(name.equalsIgnoreCase("TripNotes"))
+					{
+						xpp.next();
+						arrivals_list_adapter.last().setNote(xpp.getText());
 					}
 				} else if(eventType == XmlPullParser.END_DOCUMENT) {
 					i = timesToShow;
@@ -409,7 +430,7 @@ public class Routes extends SherlockFragment {
 					if(pd != null)
 						pd.dismiss();
 					log(array_spinner.length + " ");
-					RouteInfoTextView.setText("There doesn't seem to be any route info available. Please try back later.");
+					//RouteInfoTextView.setText("There doesn't seem to be any route info available. Please try back later.");
 
 				}
 				else{
@@ -460,8 +481,8 @@ public class Routes extends SherlockFragment {
 			NodeList nodes2 = doc2.getElementsByTagName("ScheduledStops");
 			if(nodes2.getLength() == 0)
 			{
-				Routes.this.RouteInfoTextView.setTextSize(15);
-				Routes.this.RouteInfoTextView.setText("There are no more times available for this route.");
+				//Routes.this.RouteInfoTextView.setTextSize(15);
+				//Routes.this.RouteInfoTextView.setText("There are no more times available for this route.");
 				StopNameSpinner.setClickable(false);
 				return;
 			}
@@ -511,7 +532,9 @@ public class Routes extends SherlockFragment {
 		@Override
 		protected void onPostExecute(HttpResponse result) {
 			PrintXml printer = new PrintXml();
+			arrivals_list_adapter.clear();
 			printer.execute(result);
+			
 		}
 	}
 

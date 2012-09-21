@@ -54,7 +54,9 @@ public class BT4Android extends SherlockFragmentActivity {
 		mTabsAdapter.addTab(mTabHost.newTabSpec("simple").setIndicator("Routes"),
 				Routes.class, null);
 		mTabsAdapter.addTab(mTabHost.newTabSpec("contacts").setIndicator("Favorites"),
-				Favorites.class, null);      
+				Favorites.class, null);
+		mTabsAdapter.addTab(mTabHost.newTabSpec("contacts").setIndicator("BT Updates"),
+				Updates.class, null);
 		mTabHost.setCurrentTab(settings.getInt("defaultTab", 0));
 
 		for(int j=0 ; j < mTabHost.getTabWidget().getChildCount() ; j++) 
