@@ -103,15 +103,36 @@
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Departures"
-            android:textColor="#330000" />
+            android:text="Departures:"
+            android:textColor="#330000"
+            android:textSize="17dip" />
 
-        <ListView 
-            android:id="@+id/arrivals_list"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            style="@style/List_font"
-            />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="24dp"
+                android:layout_height="wrap_content" />
+
+            <ListView
+                android:id="@+id/arrivals_list"
+                style="@style/List_font"
+                android:layout_width="155dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="0.69" >
+
+            </ListView>
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.20" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
     <ListView
