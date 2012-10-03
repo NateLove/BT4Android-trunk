@@ -21,17 +21,27 @@ Then Create a workspace in the BT4Android folder.
 
 2) A bug in eclipse prevents you from importing existing Android projects when they are in a situation like is required for (1). See [here][2] for details, but the basic idea is that you have to move the projects, import them to eclipse (to get their information into the .metadata folder), then delete them without removing the contents on disk, then move them back, then import existing projects into workspace and you can select them. Annoying, but here's the whole process (all $ are done in the shell, all # are done in eclipse)
 
-$ git clone ... BT4Android
-# Open eclipse, create a new workspace on top of BT4Android
-$ cd BT4Android
-$ mv ActionBarSherlockLibrary ~/Desktop
-# Select File-> Import --> Existing Android Code into Workspace
-# Select ~/Desktop/ActionBarSherlockLibrary for import
-# Right click on abs library-->properties: Ensure that Properties-->Android lists at least API 15 and that 'is Library' is checked
-# Ensure Properties-->Java Compiler has compiler compliance level set to 1.6
-# Delete the imported project, but leave contents on disk
-$ mv ~/ActionBarSherlockLibrary .
-# File --> Import --> Existing Projects into Workspace --> Browse to BT4Android and select ActionBarSherlock
+-$ git clone ... BT4Android
+
+-# Open eclipse, create a new workspace on top of BT4Android
+
+-$ cd BT4Android
+
+-$ mv ActionBarSherlockLibrary ~/Desktop
+
+-# Select File-> Import --> Existing Android Code into Workspace
+
+-# Select ~/Desktop/ActionBarSherlockLibrary for import
+
+-# Right click on abs library-->properties: Ensure that Properties-->Android lists at least API 15 and that 'is Library' is checked
+
+-# Ensure Properties-->Java Compiler has compiler compliance level set to 1.6
+
+-# Delete the imported project, but leave contents on disk
+
+-$ mv ~/ActionBarSherlockLibrary .
+
+-# File --> Import --> Existing Projects into Workspace --> Browse to BT4Android and select ActionBarSherlock
 
 Repeat the process (the moving / importing part) for BT4Android
 
