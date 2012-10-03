@@ -48,17 +48,23 @@ import com.actionbarsherlock.view.MenuItem;
 
 public class Favorites extends SherlockListFragment {
 
-	static private String[] Items = null;// used to hold items that are in the list view
-	private boolean longClick_ = false; // used to tell the gui if click was long click or short click
+	static private String[] Items = null;// used to hold items that are in the
+											// list view
+	private boolean longClick_ = false; // used to tell the gui if click was
+										// long click or short click
 	ArrayAdapter<String> adapter_ = null; // holds list for listview
-	static Map<Integer, stops> favorites_ = new HashMap<Integer, stops>();// holds all data for each favorite
-	AlertDialog.Builder alert = null; //pop window 
+	static Map<Integer, stops> favorites_ = new HashMap<Integer, stops>();// holds
+																			// all
+																			// data
+																			// for
+																			// each
+																			// favorite
+	AlertDialog.Builder alert = null; // pop window
 	public int timesToShow;
 	public static final String PREFS_NAME = "MyPrefsFile";
 	static private Favorites favs = null;
 
-	static public Favorites getFavorites()
-	{
+	static public Favorites getFavorites() {
 		return favs;
 	}
 
@@ -69,53 +75,62 @@ public class Favorites extends SherlockListFragment {
 	}
 
 	static SherlockListFragment currActivity = null;
+
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 		setHasOptionsMenu(true);
 		currActivity = this;
 		favorites_.put(0, new stops());
-		SharedPreferences settings = currActivity.getActivity().getSharedPreferences(PREFS_NAME, 0);
+		SharedPreferences settings = currActivity.getActivity()
+				.getSharedPreferences(PREFS_NAME, 0);
 		timesToShow = settings.getInt("timesShown", 5);
-		this.getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-		boolean isSDpresent = android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED);
-		if(isSDpresent){
+		this.getActivity()
+				.getWindow()
+				.setSoftInputMode(
+						WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+		boolean isSDpresent = android.os.Environment.getExternalStorageState()
+				.equals(android.os.Environment.MEDIA_MOUNTED);
+		if (isSDpresent) {
 			updateFavorites();
 		}
 
-		if(Items == (null) ) 
-		{
-			Items =  new String[1];
+		if (Items == (null)) {
+			Items = new String[1];
 			Items[0] = "EMPTY";
 		}
 
-		adapter_ = new ArrayAdapter<String>(currActivity.getActivity(), R.layout.list_item, Items);
+		adapter_ = new ArrayAdapter<String>(currActivity.getActivity(),
+				R.layout.list_item, Items);
 		setListAdapter(adapter_);
 		ListView lv = getListView();
 		lv.setTextFilterEnabled(true);
-		
-		//sets up what happens if items are clicked
+
+		// sets up what happens if items are clicked
 		lv.setOnItemClickListener(new OnItemClickListener() {
 
-			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,long arg3) {
-				if(longClick_) {
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				if (longClick_) {
 					longClick_ = false;
 					return;
 				}
-				if(favorites_.isEmpty()) return;
+				if (favorites_.isEmpty())
+					return;
 				showDialog(favorites_.get(arg2));
 				updateAdapter(currActivity.getActivity());
 				makeToast("Getting Stop Data");
 			}
 		});
 
-		//sets up what happens if items are long clicked
-		lv.setOnItemLongClickListener( new OnItemLongClickListener() {
+		// sets up what happens if items are long clicked
+		lv.setOnItemLongClickListener(new OnItemLongClickListener() {
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
 					int arg2, long arg3) {
 				// TODO Auto-generated method stub
 				// Get instance of Vibrator from current Context
-				Vibrator v = (Vibrator) currActivity.getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+				Vibrator v = (Vibrator) currActivity.getActivity()
+						.getSystemService(Context.VIBRATOR_SERVICE);
 				// Vibrate for 300 milliseconds
 				v.vibrate(50);
 				longClick_ = true;
@@ -126,19 +141,21 @@ public class Favorites extends SherlockListFragment {
 		});
 	}
 
-	//updates the list adapter if a stop is added or removed
+	// updates the list adapter if a stop is added or removed
 	protected void updateAdapter(Context currActivity) {
 		// TODO Auto-generated method stub
-		adapter_ = new ArrayAdapter<String>(currActivity, R.layout.list_item, Items);
+		adapter_ = new ArrayAdapter<String>(currActivity, R.layout.list_item,
+				Items);
 		setListAdapter(adapter_);
 		adapter_.notifyDataSetChanged();
 	}
 
-	//shows the stop times in new window for giiven stop
-	private void showDialog(stops s)
-	{
-		if(favorites_.isEmpty()) return;
-		String url = "http://bt4u.org/BT4U_WebService.asmx/GetNextDepartures?routeShortName=" + s.shortRoute + "&stopCode=" + s.stopCode;
+	// shows the stop times in new window for giiven stop
+	private void showDialog(stops s) {
+		if (favorites_.isEmpty())
+			return;
+		String url = "http://bt4u.org/BT4U_WebService.asmx/GetNextDepartures?routeShortName="
+				+ s.shortRoute + "&stopCode=" + s.stopCode;
 		Map<String, String> args = new HashMap<String, String>();
 		args.put("routeShortName", s.shortRoute);
 		args.put("StopCode", s.stopCode);
@@ -147,21 +164,21 @@ public class Favorites extends SherlockListFragment {
 		tg.execute(url);
 	}
 
-	//puts up toast notification that says message
-	public static void makeToast(String message)
-	{
-		Toast.makeText(currActivity.getActivity(), message,
-				Toast.LENGTH_SHORT).show();
+	// puts up toast notification that says message
+	public static void makeToast(String message) {
+		Toast.makeText(currActivity.getActivity(), message, Toast.LENGTH_SHORT)
+				.show();
 	}
 
-	//shows remove dialog for given stop
-	private AlertDialog.Builder getRemoveDialog(final Map<Integer, stops> favorites, final int index)
-	{
-		AlertDialog.Builder alert = new AlertDialog.Builder(currActivity.getActivity());
+	// shows remove dialog for given stop
+	private AlertDialog.Builder getRemoveDialog(
+			final Map<Integer, stops> favorites, final int index) {
+		AlertDialog.Builder alert = new AlertDialog.Builder(
+				currActivity.getActivity());
 		alert.setTitle("Remove Favorite");
 		alert.setMessage("would you like to remove this stop" + "?");
-		
-		// Set an EditText view to get user input 
+
+		// Set an EditText view to get user input
 		alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int whichButton) {
 				// String value = input.getText().toString();
@@ -169,24 +186,23 @@ public class Favorites extends SherlockListFragment {
 				favorites.remove(index);
 				Object[] keys = favorites.keySet().toArray();
 				String fileData = "";
-				for(int i = 0; i < favorites.size(); i++)
-				{
+				for (int i = 0; i < favorites.size(); i++) {
 					stops temp = favorites.get(keys[i]);
-					fileData += temp.name + "," +
-							temp.shortRoute + "," + 	
-							temp.location + "," +
-							temp.stopCode + "\n"; 	
+					fileData += temp.name + "," + temp.shortRoute + ","
+							+ temp.location + "," + temp.stopCode + "\n";
 				}
-				boolean isSDpresent = android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED);
-				if(isSDpresent){
-					String path =  Environment.getExternalStorageDirectory() + "/BT4U/";
+				boolean isSDpresent = android.os.Environment
+						.getExternalStorageState().equals(
+								android.os.Environment.MEDIA_MOUNTED);
+				if (isSDpresent) {
+					String path = Environment.getExternalStorageDirectory()
+							+ "/BT4U/";
 					File root = new File(path);
 					root.mkdirs();
 
 					try {
 						File f = new File(root, "favorites.txt");
-						if(!f.exists())
-						{
+						if (!f.exists()) {
 							FileOutputStream fos;
 							fos = new FileOutputStream(f);
 							fos.close();
@@ -195,6 +211,12 @@ public class Favorites extends SherlockListFragment {
 						writer = new FileWriter(f);
 						writer.write(fileData);
 						writer.close();
+
+						FileOutputStream fos = Favorites.this.getActivity()
+								.openFileOutput("favorites.txt",
+										Context.MODE_PRIVATE);
+						fos.write(fileData.getBytes());
+						fos.close();
 
 					} catch (Exception e) {
 						e.printStackTrace();
@@ -207,127 +229,114 @@ public class Favorites extends SherlockListFragment {
 			}
 
 		});
-		alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			public void onClick(DialogInterface dialog, int whichButton) {
+		alert.setNegativeButton("Cancel",
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
 
-			}
-		});
+					}
+				});
 
 		return alert;
 	}
-	//class for holding stop information
-	//refreshes the items list
+
+	// class for holding stop information
+	// refreshes the items list
 	private static void refreshItems() {
-		if(favorites_.isEmpty()) return;
+		if (favorites_.isEmpty())
+			return;
 		Items = new String[favorites_.size()];
-		for (int i = 0; i < favorites_.size(); i++)
-		{
+		for (int i = 0; i < favorites_.size(); i++) {
 			stops temp = favorites_.get(i);
-			Items[i]  = "Route: " + temp.name + "\nLocation:" + temp.location.split("-")[1] + "\nStop Code: " + temp.stopCode;
+			Items[i] = "Route: " + temp.name + "\nLocation:"
+					+ temp.location.split("-")[1] + "\nStop Code: "
+					+ temp.stopCode;
 		}
-		try
-		{
-		if(favs != null && currActivity != null)
-			favs.setListAdapter(new ArrayAdapter<String>(currActivity.getActivity(), R.layout.list_item, Items));
-		}catch (Exception e) {// Catch exception if any
+		try {
+			if (favs != null && currActivity != null)
+				favs.setListAdapter(new ArrayAdapter<String>(currActivity
+						.getActivity(), R.layout.list_item, Items));
+		} catch (Exception e) {// Catch exception if any
 			Log.i("Favorites", "null pointer  oh well");
 		}
 	}
 
-	//updates entire favorites list
-	public static void updateFavorites()
-	{
+	// updates entire favorites list
+	public void updateFavorites() {
 		Log.i("Favorites", "updating favorites");
-		boolean isSDpresent = android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED);
-		if(isSDpresent){
-			try {
-				String path = Environment.getExternalStorageDirectory().getCanonicalPath() + "/BT4U/";
-				File root = new File(path);
-				root.mkdirs();
-				File f = new File(root, "favorites.txt");
-				if(!f.exists())
-				{
-					FileOutputStream fos = new FileOutputStream(f);
-					fos.close();
-				}
-				FileReader r = new FileReader(f);
-				BufferedReader br = new BufferedReader(r);
-				// Open the file that is the first
-				// command line parameter
-				String strLine;
-				// Read File Line By Line
-				int i = 0;
-				favorites_.clear();
-				while ((strLine = br.readLine()) != null) {
-					// Print the content on the console
-					//String[] allWords;
-					StringTokenizer st = new StringTokenizer(strLine, ",");
-					stops temp = new stops();
-					temp.name = st.nextToken();
-					temp.shortRoute = st.nextToken();
-					temp.location = st.nextToken();
-					temp.stopCode = st.nextToken();
-					favorites_.put(i, temp);
-					i++;
-				}
-				r.close();
-			} catch (Exception e) {// Catch exception if any
-				e.printStackTrace();
-			}
 
-			refreshItems();
+		try {
+			BufferedReader br = new BufferedReader(new InputStreamReader(this
+					.getActivity().openFileInput("favorites.txt"), "UTF-8"));
+			
+			String strLine ="";;
+			// Read File Line By Line
+			int i = 0;
+			favorites_.clear();
+			while ((strLine = br.readLine()) != null) {
+				// Print the content on the console
+				// String[] allWords;
+				StringTokenizer st = new StringTokenizer(strLine, ",");
+				stops temp = new stops();
+				temp.name = st.nextToken();
+				temp.shortRoute = st.nextToken();
+				temp.location = st.nextToken();
+				temp.stopCode = st.nextToken();
+				favorites_.put(i, temp);
+				i++;
+			}
+			br.close();
+		} catch (Exception e) {// Catch exception if any
+			e.printStackTrace();
 		}
-		else 
-			makeToast("Seems no SD card is available");
+
+		refreshItems();
+
 	}
-	
-	//returns stop times from xml file
-	public String printXml(String resp) throws XmlPullParserException, IOException, InterruptedException
-	{
+
+	// returns stop times from xml file
+	public String printXml(String resp) throws XmlPullParserException,
+			IOException, InterruptedException {
 		XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
 		factory.setNamespaceAware(true);
 		XmlPullParser xpp = factory.newPullParser();
-		xpp.setInput( new StringReader(resp) );
+		xpp.setInput(new StringReader(resp));
 		int eventType = xpp.getEventType();
 		String temp = "";
-		SharedPreferences settings = currActivity.getActivity().getSharedPreferences(PREFS_NAME, 0);
+		SharedPreferences settings = currActivity.getActivity()
+				.getSharedPreferences(PREFS_NAME, 0);
 		timesToShow = settings.getInt("timesShown", 5);
 		int i = 0;
-		while(i < timesToShow)
-		{
-			if(eventType == XmlPullParser.START_DOCUMENT) {
+		while (i < timesToShow) {
+			if (eventType == XmlPullParser.START_DOCUMENT) {
 				temp += "";
-			} else if(eventType == XmlPullParser.START_TAG) {
+			} else if (eventType == XmlPullParser.START_TAG) {
 
 				String name = xpp.getName();
-				if(name.equalsIgnoreCase("patternpointname"))
-				{
+				if (name.equalsIgnoreCase("patternpointname")) {
 					xpp.next();
 				}
-				if(name.equalsIgnoreCase("adjusteddeparturetime"))
-				{
+				if (name.equalsIgnoreCase("adjusteddeparturetime")) {
 					xpp.next();
-					temp += "\t\t\t" + xpp.getText().split(" ")[1] + " " + xpp.getText().split(" ")[2] + "\n";	
+					temp += "\t\t\t" + xpp.getText().split(" ")[1] + " "
+							+ xpp.getText().split(" ")[2] + "\n";
 					i++;
 				}
-			} else if(eventType == XmlPullParser.END_DOCUMENT) {
+			} else if (eventType == XmlPullParser.END_DOCUMENT) {
 				i = timesToShow;
-			} else if(eventType == XmlPullParser.TEXT) {
+			} else if (eventType == XmlPullParser.TEXT) {
 				temp += ("");
 
 			}
 			eventType = xpp.next();
 		}
 
-		if(temp.equals(""))
-		{
+		if (temp.equals("")) {
 			temp = ("There is no more route info for today.\n\nYou should probably start walking.");
 		}
 		return temp;
 	}
 
-	class TimeGetter extends AsyncTask<String, Integer, String>
-	{
+	class TimeGetter extends AsyncTask<String, Integer, String> {
 		@Override
 		protected String doInBackground(String... params) {
 
@@ -340,8 +349,8 @@ public class Favorites extends SherlockListFragment {
 				BufferedReader bin = new BufferedReader(ir);
 				String line = null;
 				StringBuffer buff = new StringBuffer();
-				while((line = bin.readLine())!=null){
-					buff.append(line+"\n");
+				while ((line = bin.readLine()) != null) {
+					buff.append(line + "\n");
 				}
 				bin.close();
 				return buff.toString();
@@ -360,14 +369,16 @@ public class Favorites extends SherlockListFragment {
 				data = printXml(result);
 				alert.setTitle("Next Stop Times");
 				alert.setMessage(data);
-				
-				// Set an EditText view to get user input 
-				alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						// String value = input.getText().toString();
-						// Do something with value!
-					}
-				});
+
+				// Set an EditText view to get user input
+				alert.setPositiveButton("Ok",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int whichButton) {
+								// String value = input.getText().toString();
+								// Do something with value!
+							}
+						});
 				alert.show();
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -375,21 +386,26 @@ public class Favorites extends SherlockListFragment {
 		}
 	}
 
-	static class stops{
+	static class stops {
 		public String name = null;
 		public String location = null;
 		public String stopCode = null;
 		public String shortRoute = null;
 
 	}
-	private final int settingsId = 1;
-	@Override public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
 
-		MenuItem addFavItem = menu.add(Menu.NONE, settingsId, settingsId, "Settings");
+	private final int settingsId = 1;
+
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+
+		MenuItem addFavItem = menu.add(Menu.NONE, settingsId, settingsId,
+				"Settings");
 		addFavItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
 	}
 
-	@Override public boolean onOptionsItemSelected(MenuItem item) {
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
 
 		switch (item.getItemId()) {
 		case settingsId:
@@ -403,8 +419,9 @@ public class Favorites extends SherlockListFragment {
 	@Override
 	public void onResume() {
 		super.onResume();
-		adapter_ = new ArrayAdapter<String>(this.getActivity(), R.layout.list_item, Items);
+		adapter_ = new ArrayAdapter<String>(this.getActivity(),
+				R.layout.list_item, Items);
 		setListAdapter(adapter_);
-		Log.i("BT4android.Favorites","OnResume");
+		Log.i("BT4android.Favorites", "OnResume");
 	}
 }

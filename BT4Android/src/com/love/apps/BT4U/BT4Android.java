@@ -1,10 +1,18 @@
 package com.love.apps.BT4U;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -16,6 +24,8 @@ import android.widget.RelativeLayout;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.Leadbolt.AdController;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
@@ -44,6 +54,7 @@ public class BT4Android extends SherlockFragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		checkForOldFavorites();
 		setupGoogleAnalytics();
 		setContentView(R.layout.fragment_tabs_pager);
 		mTabHost = (TabHost)findViewById(android.R.id.tabhost);
@@ -215,5 +226,47 @@ public class BT4Android extends SherlockFragmentActivity {
 	    super.onDestroy();
 	  }
 
+	private void checkForOldFavorites()
+	{
+		Log.d("BT4ANDROID STORAGE", "Entering function");
+		boolean isSDpresent = android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED);
+		if(isSDpresent){
+			Log.d("BT4ANDROID STORAGE", "SD Present");
+
+			try {
+				String path =  Environment.getExternalStorageDirectory() + "/BT4U/";
+				File root = new File(path);
+				File f = new File(root, "favorites.txt");
+				if(!f.exists())
+				{
+					//file doesn't exist we're done
+					Log.d("BT4ANDROID STORAGE", "Old Favorites folder does not exist" );
+
+					return;
+				}
+				String content= "";
+				FileReader r = new FileReader(f);
+				this.openFileOutput("favorites.txt", MODE_APPEND);
+				//BufferedReader br = new BufferedReader(new InputStreamReader(this.openFileInput("favorites.txt"), "UTF-8"));
+
+				BufferedReader br = new BufferedReader(r);
+				String line = null;
+				while((line = br.readLine()) != null){
+					content += line;
+					content += "\n";
+					Log.d("BT4ANDROID STORAGE",(line));
+				}
+				Log.d("BT4ANDROID STORAGE", "favorites.txt is delted: " + f.delete()  );
+				Log.d("BT4ANDROID STORAGE", "Folder bt4u is deleted: " + root.delete() + " " );
+				FileOutputStream fos = this.openFileOutput("favorites.txt", Context.MODE_PRIVATE);
+				fos.write(content.getBytes());
+				fos.close();
+				br.close();
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
 }
