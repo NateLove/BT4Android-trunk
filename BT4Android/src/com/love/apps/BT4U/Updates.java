@@ -38,6 +38,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.love.qsort.MyQsort;
 
 public class Updates extends SherlockFragment 
@@ -53,7 +56,8 @@ public class Updates extends SherlockFragment
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {		
 		super.onCreateView(inflater, container, savedInstanceState);
-		
+		setHasOptionsMenu(true);
+
 		final View v = inflater.inflate(R.layout.activity_btupdates, container, false);
 		ListView lv = (ListView)v.findViewById(R.id.btupdates_list);
 		theAdapter = new BTUpdateArrayAdapter(this.getActivity().getBaseContext(),android.R.layout.simple_list_item_1);	
@@ -269,4 +273,25 @@ public class Updates extends SherlockFragment
 			}
 		}
 	}
+	private final int settingsId = 1;
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+
+		MenuItem addFavItem = menu.add(Menu.NONE, settingsId, settingsId,
+				"Settings");
+		addFavItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+
+		switch (item.getItemId()) {
+		case settingsId:
+			Intent i = new Intent(this.getActivity(), SettingsActivity.class);
+			startActivity(i);
+			return true;
+		}
+		return false;
+	}
+
 }

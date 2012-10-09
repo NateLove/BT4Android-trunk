@@ -31,6 +31,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
@@ -302,11 +303,10 @@ public class Favorites extends SherlockListFragment {
 		xpp.setInput(new StringReader(resp));
 		int eventType = xpp.getEventType();
 		String temp = "";
-		SharedPreferences settings = currActivity.getActivity()
-				.getSharedPreferences(PREFS_NAME, 0);
-		timesToShow = settings.getInt("timesShown", 5);
+		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(Favorites.this.getActivity());
+		String times2Show = sharedPref.getString("times", "5");
 		int i = 0;
-		while (i < timesToShow) {
+		while (i < Integer.parseInt(times2Show)) {
 			if (eventType == XmlPullParser.START_DOCUMENT) {
 				temp += "";
 			} else if (eventType == XmlPullParser.START_TAG) {
@@ -322,7 +322,7 @@ public class Favorites extends SherlockListFragment {
 					i++;
 				}
 			} else if (eventType == XmlPullParser.END_DOCUMENT) {
-				i = timesToShow;
+				i = Integer.parseInt(times2Show);
 			} else if (eventType == XmlPullParser.TEXT) {
 				temp += ("");
 

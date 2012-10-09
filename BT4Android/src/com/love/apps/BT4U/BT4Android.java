@@ -10,9 +10,11 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -28,6 +30,9 @@ import android.widget.Toast;
 
 import com.Leadbolt.AdController;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
 
@@ -59,16 +64,17 @@ public class BT4Android extends SherlockFragmentActivity {
 		setContentView(R.layout.fragment_tabs_pager);
 		mTabHost = (TabHost)findViewById(android.R.id.tabhost);
 		mTabHost.setup();
-		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
 		mViewPager = (ViewPager)findViewById(R.id.pager);
 		mTabsAdapter = new TabsAdapter(this, mTabHost, mViewPager);
-		mTabsAdapter.addTab(mTabHost.newTabSpec("simple").setIndicator("Routes"),
+		mTabsAdapter.addTab(mTabHost.newTabSpec("routes").setIndicator("Routes"),
 				Routes.class, null);
-		mTabsAdapter.addTab(mTabHost.newTabSpec("contacts").setIndicator("Favorites"),
+		mTabsAdapter.addTab(mTabHost.newTabSpec("favorites").setIndicator("Favorites"),
 				Favorites.class, null);
-		mTabsAdapter.addTab(mTabHost.newTabSpec("contacts").setIndicator("BT Updates"),
+		mTabsAdapter.addTab(mTabHost.newTabSpec("updates").setIndicator("BT Updates"),
 				Updates.class, null);
-		mTabHost.setCurrentTab(settings.getInt("defaultTab", 0));
+		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+		String tab = sharedPref.getString("tab", "0");
+		mTabHost.setCurrentTab(Integer.parseInt(tab));
 
 		for(int j=0 ; j < mTabHost.getTabWidget().getChildCount() ; j++) 
 		{
@@ -91,8 +97,9 @@ public class BT4Android extends SherlockFragmentActivity {
 	protected void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
 		outState.putString("tab", mTabHost.getCurrentTabTag());
-		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-		mTabHost.setCurrentTab(settings.getInt("defaultTab", 0));
+		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+		String tab = sharedPref.getString("tab", "0");
+		mTabHost.setCurrentTab(Integer.parseInt(tab));
 
 	}
 
@@ -268,5 +275,6 @@ public class BT4Android extends SherlockFragmentActivity {
 			}
 		}
 	}
+	
 
 }
