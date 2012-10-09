@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="List_font" parent="@android:style/TextAppearance.Small">
+        <item name="android:textColor">#ff330000</item>
+        <item name="android:typeface">monospace</item>
+    </style>
+</resources>

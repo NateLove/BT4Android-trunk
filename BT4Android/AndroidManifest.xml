@@ -41,7 +41,7 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
-        <activity android:name="aboutMe" >
+        <activity android:name="aboutMe" android:theme="@style/Theme.cool">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
