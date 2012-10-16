@@ -2,6 +2,7 @@ package com.love.apps.BT4U;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -52,7 +53,7 @@ public class Favorites extends SherlockListFragment {
 	private boolean longClick_ = false; // used to tell the gui if click was
 										// long click or short click
 	ArrayAdapter<String> adapter_ = null; // holds list for listview
-	static Map<Integer, stops> favorites_ = new HashMap<Integer, stops>();// holds
+	static Map<Integer, FavoriteStop> favorites_ = new HashMap<Integer, FavoriteStop>();// holds
 																			// all
 																			// data
 																			// for
@@ -80,7 +81,7 @@ public class Favorites extends SherlockListFragment {
 		super.onActivityCreated(savedInstanceState);
 		setHasOptionsMenu(true);
 		currActivity = this;
-		favorites_.put(0, new stops());
+		favorites_.put(0, new FavoriteStop());
 		SharedPreferences settings = currActivity.getActivity()
 				.getSharedPreferences(PREFS_NAME, 0);
 		timesToShow = settings.getInt("timesShown", 5);
@@ -150,7 +151,7 @@ public class Favorites extends SherlockListFragment {
 	}
 
 	// shows the stop times in new window for giiven stop
-	private void showDialog(stops s) {
+	private void showDialog(FavoriteStop s) {
 		if (favorites_.isEmpty())
 			return;
 		String url = "http://bt4u.org/BT4U_WebService.asmx/GetNextDepartures?routeShortName="
@@ -171,7 +172,7 @@ public class Favorites extends SherlockListFragment {
 
 	// shows remove dialog for given stop
 	private AlertDialog.Builder getRemoveDialog(
-			final Map<Integer, stops> favorites, final int index) {
+			final Map<Integer, FavoriteStop> favorites, final int index) {
 		AlertDialog.Builder alert = new AlertDialog.Builder(
 				currActivity.getActivity());
 		alert.setTitle("Remove Favorite");
@@ -186,7 +187,7 @@ public class Favorites extends SherlockListFragment {
 				Object[] keys = favorites.keySet().toArray();
 				String fileData = "";
 				for (int i = 0; i < favorites.size(); i++) {
-					stops temp = favorites.get(keys[i]);
+					FavoriteStop temp = favorites.get(keys[i]);
 					fileData += temp.name + "," + temp.shortRoute + ","
 							+ temp.location + "," + temp.stopCode + "\n";
 				}
@@ -245,7 +246,7 @@ public class Favorites extends SherlockListFragment {
 			return;
 		Items = new String[favorites_.size()];
 		for (int i = 0; i < favorites_.size(); i++) {
-			stops temp = favorites_.get(i);
+			FavoriteStop temp = favorites_.get(i);
 			Items[i] = "Route: " + temp.name + "\nLocation:"
 					+ temp.location.split("-")[1] + "\nStop Code: "
 					+ temp.stopCode;
@@ -266,8 +267,9 @@ public class Favorites extends SherlockListFragment {
 		try {
 			BufferedReader br = new BufferedReader(new InputStreamReader(this
 					.getActivity().openFileInput("favorites.txt"), "UTF-8"));
+
+			String strLine = "";
 			
-			String strLine ="";;
 			// Read File Line By Line
 			int i = 0;
 			favorites_.clear();
@@ -275,21 +277,28 @@ public class Favorites extends SherlockListFragment {
 				// Print the content on the console
 				// String[] allWords;
 				StringTokenizer st = new StringTokenizer(strLine, ",");
-				stops temp = new stops();
-				temp.name = st.nextToken();
-				temp.shortRoute = st.nextToken();
-				temp.location = st.nextToken();
-				temp.stopCode = st.nextToken();
-				favorites_.put(i, temp);
+				FavoriteStop stop = new FavoriteStop();
+				stop.name = st.nextToken();
+				stop.shortRoute = st.nextToken();
+				stop.location = st.nextToken();
+				stop.stopCode = st.nextToken();
+				favorites_.put(i, stop);
 				i++;
 			}
 			br.close();
-		} catch (Exception e) {// Catch exception if any
+			refreshItems();
+
+		} catch (FileNotFoundException fnf) {
+			log("Favorites storage file not found");
+		} catch (Exception e) {
+			log("Unknown exception when updating favorites: " + e.getMessage());
 			e.printStackTrace();
 		}
 
-		refreshItems();
+	}
 
+	private static void log(String message) {
+		Log.i("Favorites", message);
 	}
 
 	// returns stop times from xml file
@@ -301,7 +310,8 @@ public class Favorites extends SherlockListFragment {
 		xpp.setInput(new StringReader(resp));
 		int eventType = xpp.getEventType();
 		String temp = "";
-		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(Favorites.this.getActivity());
+		SharedPreferences sharedPref = PreferenceManager
+				.getDefaultSharedPreferences(Favorites.this.getActivity());
 		String times2Show = sharedPref.getString("times", "5");
 		int i = 0;
 		while (i < Integer.parseInt(times2Show)) {
@@ -384,7 +394,7 @@ public class Favorites extends SherlockListFragment {
 		}
 	}
 
-	static class stops {
+	static class FavoriteStop {
 		public String name = null;
 		public String location = null;
 		public String stopCode = null;
