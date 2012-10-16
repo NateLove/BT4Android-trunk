@@ -3,7 +3,6 @@ package com.love.apps.BT4U;
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -11,10 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -38,7 +33,6 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
@@ -61,17 +55,15 @@ public class Routes extends SherlockFragment {
 	private Map<String, String> routes_ = new HashMap<String, String>();
 	private Map<String, String> routeCodeToName = new HashMap<String, String>();
 	public static final String PREFS_NAME = "MyPrefsFile";
-	//public int timesToShow;
+	// public int timesToShow;
 	private volatile ProgressDialog pd;
 	static boolean isLoggingEnabled = true;
 	private Favorites favorites_ = new Favorites();
 	private ArrivalsAdapter arrivals_list_adapter;
 	private String[] routesActual = null;
 
-
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-
 		super.onCreate(savedInstanceState);
 	}
 
@@ -97,8 +89,6 @@ public class Routes extends SherlockFragment {
 		StopNameSpinner.setBackgroundResource(R.drawable.back);
 
 		array_spinner = new String[15];
-
-	
 
 		StopNameSpinner.setClickable(false);
 		FileRead reader = new FileRead();
@@ -157,26 +147,6 @@ public class Routes extends SherlockFragment {
 							"---Select---")) {
 						refreshItem.setVisible(true);
 						addFavItem.setVisible(true);
-						String routeName = null;
-						if ((routeName = routes_.get(RouteInfoSpinner
-								.getSelectedItem().toString())) == null)
-							routeName = RouteInfoSpinner.getSelectedItem()
-									.toString();
-						String url = "http://bt4u.org/BT4U_WebService.asmx/GetNextDepartures?routeShortName="
-								+ routeName
-								+ "&stopCode="
-								+ CurrentStops_[StopNameSpinner
-										.getSelectedItemPosition()];// BT4U_WebService.asmx/GetNextDepartures?routeShortName=" + array_spinner[spinner_.getSelectedItemPosition()] +  "&stopCode="
-																	// +
-																	// CurrentStops_[spinner2_.getSelectedItemPosition()];
-																	// +
-																	// spinner_.getSelectedItem();
-						Map<String, String> args = new HashMap<String, String>();
-						args.put("routeShortName",
-								array_spinner[RouteInfoSpinner
-										.getSelectedItemPosition()]);
-						args.put("StopCode", CurrentStops_[StopNameSpinner
-								.getSelectedItemPosition()]);
 
 						String routeCode = array_spinner[RouteInfoSpinner
 								.getSelectedItemPosition()];
@@ -202,7 +172,6 @@ public class Routes extends SherlockFragment {
 			}
 
 			public void onNothingSelected(AdapterView<?> arg0) {
-				// TODO Auto-generated method stub
 
 			}
 		});
@@ -211,7 +180,6 @@ public class Routes extends SherlockFragment {
 
 	// adds actual names for bus routes
 	private void setUpRoutes() {
-		// TODO Auto-generated method stub
 		routes_.put("---Select---", "1");
 		routes_.put("MSN - Main Street Northbound", "MSN");
 		routes_.put("MSS - Main Street Southbound", "MSS");
@@ -269,40 +237,6 @@ public class Routes extends SherlockFragment {
 		eventType = xpp.next();
 		return array_spinner;
 	}
-
-	// async class that is used to process all data from httputils in background
-	// threads
-	class PrintXml extends AsyncTask<HttpResponse, Void, String> {
-
-		@Override
-		protected String doInBackground(HttpResponse... params) {
-			String data = null;
-			try {
-				InputStream in = params[0].getEntity().getContent();
-				InputStreamReader ir = new InputStreamReader(in);
-				BufferedReader bin = new BufferedReader(ir);
-				String line = null;
-				StringBuffer buff = new StringBuffer();
-				while ((line = bin.readLine()) != null) {
-					buff.append(line + "\n");
-				}
-				bin.close();
-				//data = printXml(buff.toString());
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			return data;
-		}
-
-		@Override
-		protected void onPostExecute(String result) {
-
-			Routes.this.arrivals_list_adapter.notifyDataSetChanged();
-		}
-
-	}
-
 
 	class RouteGetter extends AsyncTask<Void, Void, List<String>> {
 
@@ -428,7 +362,8 @@ public class Routes extends SherlockFragment {
 			if (departures.size() == 0)
 				return new ArrayList<Arrival>();
 
-			SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(Routes.this.getActivity());
+			SharedPreferences sharedPref = PreferenceManager
+					.getDefaultSharedPreferences(Routes.this.getActivity());
 			int timesToShow = sharedPref.getInt("times", 5);
 
 			int i = 0;
@@ -436,7 +371,7 @@ public class Routes extends SherlockFragment {
 			for (ScheduledDeparture departure : departures) {
 				if (i++ > timesToShow)
 					break;
-				
+
 				Arrival a = new Arrival(departure.departureTime);
 				result.add(a);
 			}
@@ -545,23 +480,15 @@ public class Routes extends SherlockFragment {
 					|| StopNameSpinner.getSelectedItem().equals("---Select---")) {
 				return true;
 			}
-			String url = "http://bt4u.org/BT4U_WebService.asmx/GetNextDepartures?routeShortName="
-					+ routes_
-							.get(RouteInfoSpinner.getSelectedItem().toString())
-					+ "&stopCode="
-					+ CurrentStops_[StopNameSpinner.getSelectedItemPosition()];// BT4U_WebService.asmx/GetNextDepartures?routeShortName=" + array_spinner[spinner_.getSelectedItemPosition()] +  "&stopCode="
-																				// +
-																				// CurrentStops_[spinner2_.getSelectedItemPosition()];
-																				// +
-																				// spinner_.getSelectedItem();
 
-			Map<String, String> args = new HashMap<String, String>();
-			args.put("routeShortName",
-					routes_.get(RouteInfoSpinner.getSelectedItem().toString()));
-			args.put("StopCode",
-					CurrentStops_[StopNameSpinner.getSelectedItemPosition()]);
+			String routeCode = routes_.get(RouteInfoSpinner.getSelectedItem()
+					.toString());
+			String stopCode = CurrentStops_[StopNameSpinner
+					.getSelectedItemPosition()];
+
 			TimeGetter tg = new TimeGetter();
-			tg.execute(url);
+			tg.execute(routeCode, stopCode);
+
 			break;
 
 		case settingsID:
@@ -591,6 +518,5 @@ public class Routes extends SherlockFragment {
 		super.onInflate(activity, attrs, savedInstanceState);
 		log("onInflate");
 	}
-	
-	
+
 }
