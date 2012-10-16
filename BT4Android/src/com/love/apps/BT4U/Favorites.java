@@ -4,21 +4,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -44,6 +35,8 @@ import com.actionbarsherlock.app.SherlockListFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.love.apps.BT4U.webservice.BT4U;
+import com.love.apps.BT4U.webservice.ScheduledDeparture;
 
 public class Favorites extends SherlockListFragment {
 
@@ -59,7 +52,6 @@ public class Favorites extends SherlockListFragment {
 																			// each
 																			// favorite
 	AlertDialog.Builder alert = null; // pop window
-	public int timesToShow;
 	public static final String PREFS_NAME = "MyPrefsFile";
 	static private Favorites favs = null;
 
@@ -81,9 +73,6 @@ public class Favorites extends SherlockListFragment {
 		setHasOptionsMenu(true);
 		currActivity = this;
 		favorites_.put(0, new stops());
-		SharedPreferences settings = currActivity.getActivity()
-				.getSharedPreferences(PREFS_NAME, 0);
-		timesToShow = settings.getInt("timesShown", 5);
 		this.getActivity()
 				.getWindow()
 				.setSoftInputMode(
@@ -126,7 +115,6 @@ public class Favorites extends SherlockListFragment {
 		lv.setOnItemLongClickListener(new OnItemLongClickListener() {
 			public boolean onItemLongClick(AdapterView<?> arg0, View arg1,
 					int arg2, long arg3) {
-				// TODO Auto-generated method stub
 				// Get instance of Vibrator from current Context
 				Vibrator v = (Vibrator) currActivity.getActivity()
 						.getSystemService(Context.VIBRATOR_SERVICE);
@@ -142,7 +130,6 @@ public class Favorites extends SherlockListFragment {
 
 	// updates the list adapter if a stop is added or removed
 	protected void updateAdapter(Context currActivity) {
-		// TODO Auto-generated method stub
 		adapter_ = new ArrayAdapter<String>(currActivity, R.layout.list_item,
 				Items);
 		setListAdapter(adapter_);
@@ -153,14 +140,10 @@ public class Favorites extends SherlockListFragment {
 	private void showDialog(stops s) {
 		if (favorites_.isEmpty())
 			return;
-		String url = "http://bt4u.org/BT4U_WebService.asmx/GetNextDepartures?routeShortName="
-				+ s.shortRoute + "&stopCode=" + s.stopCode;
-		Map<String, String> args = new HashMap<String, String>();
-		args.put("routeShortName", s.shortRoute);
-		args.put("StopCode", s.stopCode);
+		
 		alert = new AlertDialog.Builder(currActivity.getActivity());
 		TimeGetter tg = new TimeGetter();
-		tg.execute(url);
+		tg.execute(s.shortRoute, s.stopCode);
 	}
 
 	// puts up toast notification that says message
@@ -290,83 +273,69 @@ public class Favorites extends SherlockListFragment {
 
 		refreshItems();
 
-	}
+	}	
+	
+	class TimeGetter extends AsyncTask<Object, Void, List<Arrival>> {
 
-	// returns stop times from xml file
-	public String printXml(String resp) throws XmlPullParserException,
-			IOException, InterruptedException {
-		XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-		factory.setNamespaceAware(true);
-		XmlPullParser xpp = factory.newPullParser();
-		xpp.setInput(new StringReader(resp));
-		int eventType = xpp.getEventType();
-		String temp = "";
-		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(Favorites.this.getActivity());
-		String times2Show = sharedPref.getString("times", "5");
-		int i = 0;
-		while (i < Integer.parseInt(times2Show)) {
-			if (eventType == XmlPullParser.START_DOCUMENT) {
-				temp += "";
-			} else if (eventType == XmlPullParser.START_TAG) {
-
-				String name = xpp.getName();
-				if (name.equalsIgnoreCase("patternpointname")) {
-					xpp.next();
-				}
-				if (name.equalsIgnoreCase("adjusteddeparturetime")) {
-					xpp.next();
-					temp += "\t\t\t" + xpp.getText().split(" ")[1] + " "
-							+ xpp.getText().split(" ")[2] + "\n";
-					i++;
-				}
-			} else if (eventType == XmlPullParser.END_DOCUMENT) {
-				i = Integer.parseInt(times2Show);
-			} else if (eventType == XmlPullParser.TEXT) {
-				temp += ("");
-
-			}
-			eventType = xpp.next();
-		}
-
-		if (temp.equals("")) {
-			temp = ("There is no more route info for today.\n\nYou should probably start walking.");
-		}
-		return temp;
-	}
-
-	class TimeGetter extends AsyncTask<String, Integer, String> {
+		/**
+		 * Our @link TimeGetter requires two parameters. params[0] should be the
+		 * route code, such as HWD, and params[1] should be the stop code, such
+		 * as 1103 (as either a String or Integer)
+		 */
 		@Override
-		protected String doInBackground(String... params) {
-
+		protected List<Arrival> doInBackground(Object... params) {
+			String routeCode = (String) params[0];
+			int stopCode = -1;
 			try {
-				HttpClient httpClient = new DefaultHttpClient();
-				HttpGet httpRequest = new HttpGet(params[0]);
-				HttpResponse response = httpClient.execute(httpRequest);
-				InputStream in = response.getEntity().getContent();
-				InputStreamReader ir = new InputStreamReader(in);
-				BufferedReader bin = new BufferedReader(ir);
-				String line = null;
-				StringBuffer buff = new StringBuffer();
-				while ((line = bin.readLine()) != null) {
-					buff.append(line + "\n");
-				}
-				bin.close();
-				return buff.toString();
-
-			} catch (Exception e) {
-				e.printStackTrace();
+				stopCode = Integer.parseInt((String) params[1]);
+			} catch (NumberFormatException nfe) {
+				log("TimeGetter was passed " + params[1]
+						+ ", which could not be parsed to an int");
+				return new ArrayList<Arrival>();
 			}
-			return null;
+
+			List<ScheduledDeparture> departures = BT4U.getService()
+					.getScheduledDeparturesFromStop(routeCode, stopCode);
+
+			if (departures.size() == 0)
+				return new ArrayList<Arrival>();
+
+			SharedPreferences sharedPref = PreferenceManager
+					.getDefaultSharedPreferences(Favorites.this.getActivity());
+			int timesToShow = sharedPref.getInt("times", 5);
+
+			int i = 0;
+			List<Arrival> result = new ArrayList<Arrival>();
+			for (ScheduledDeparture departure : departures) {
+				if (i++ > timesToShow)
+					break;
+
+				Arrival a = new Arrival(departure.departureTime);
+				result.add(a);
+			}
+
+			return result;
 		}
 
 		@Override
-		protected void onPostExecute(String result) {
-			String data;
+		protected void onPostExecute(List<Arrival> stops) {
 
 			try {
-				data = printXml(result);
+				
+				SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(Favorites.this.getActivity());
+				int times2Show = sharedPref.getInt("times", 5);
+				
+				StringBuffer buffer = new StringBuffer("");
+				int i = 0;
+				for (Arrival a : stops) {
+					if (i++ > times2Show) 
+						break;
+					
+					buffer.append(a.timeUntil()).append(" ").append(a.note);
+				}
+								
 				alert.setTitle("Next Stop Times");
-				alert.setMessage(data);
+				alert.setMessage(buffer.toString());
 
 				// Set an EditText view to get user input
 				alert.setPositiveButton("Ok",
@@ -383,6 +352,7 @@ public class Favorites extends SherlockListFragment {
 			}
 		}
 	}
+	
 
 	static class stops {
 		public String name = null;
@@ -420,6 +390,11 @@ public class Favorites extends SherlockListFragment {
 		adapter_ = new ArrayAdapter<String>(this.getActivity(),
 				R.layout.list_item, Items);
 		setListAdapter(adapter_);
-		Log.i("BT4android.Favorites", "OnResume");
+		log("OnResume");
 	}
+	
+	private static void log(String message) {
+		Log.i("Favorites", message);
+	}
+
 }
