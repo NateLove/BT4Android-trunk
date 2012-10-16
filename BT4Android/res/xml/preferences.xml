@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="Settings" >
+ <PreferenceCategory 
+        android:title="Settings"
+        android:key="pref_key_storage_settings">
+    <ListPreference
+        android:dialogTitle="Default Tab"
+        android:enabled="true"
+        android:entries="@array/tabsArray"
+        android:entryValues="@array/tabsValues"
+        android:key="tab"
+        android:summary="Choose the default tab that will be displayed each time the app is opened"
+        android:title="Default Tab" />
+    <ListPreference
+        android:dialogTitle="Number of Times to Show"
+        android:enabled="true"
+        android:entries="@array/timesToShowArray"
+        android:entryValues="@array/timesToShowValues"
+        android:key="times"
+        android:summary="Select how many times will be displayed "
+        android:title="Stop Times to Show" />
+
+    <Preference android:title="About Me" >
+        <intent
+            android:targetClass="com.love.apps.BT4U.aboutMe"
+            android:targetPackage="com.love.apps.BT4U" />
+    </Preference>
+    </PreferenceCategory>
+</PreferenceScreen>

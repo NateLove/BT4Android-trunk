@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <resources>
+        <string-array name="tabsArray">
+            <item >Routes</item>
+            <item >Favorites</item>
+            <item >BT Updates</item>
+        </string-array>
+        <string-array name="timesToShowArray">
+            <item >1</item>
+            <item >3</item>
+            <item >5</item>
+            <item >All</item>
+        </string-array>
+        <string-array name="tabsValues">
+            <item >0</item>
+            <item >1</item>
+            <item >2</item>
+        </string-array>
+        <string-array name="timesToShowValues">
+            <item >1</item>
+            <item >3</item>
+            <item >5</item>
+            <item >200</item>
+        </string-array>
+    </resources>
+    

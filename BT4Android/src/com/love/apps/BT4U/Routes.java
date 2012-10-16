@@ -1,10 +1,7 @@
 package com.love.apps.BT4U;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -31,7 +28,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -58,17 +55,18 @@ public class Routes extends SherlockFragment {
 	private static Spinner StopNameSpinner = null;// bus stops
 	private ArrayAdapter<String> adapter_ = null;
 	private String array_spinner[];
-	private Map<String, String> stops_ = new HashMap<String, String>();
 	ArrayAdapter<String> adapter2_ = null;
 	private String[] CurrentStops_ = null;
 	private Map<String, String> routes_ = new HashMap<String, String>();
 	private Map<String, String> routesActual_ = new HashMap<String, String>();
 	public static final String PREFS_NAME = "MyPrefsFile";
-	public int timesToShow;
+	//public int timesToShow;
 	private volatile ProgressDialog pd;
 	static boolean isLoggingEnabled = true;
 	private Favorites favorites_ = new Favorites();
 	private ArrivalsAdapter arrivals_list_adapter;
+	private String[] routesActual = null;
+
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -102,17 +100,12 @@ public class Routes extends SherlockFragment {
 
 		array_spinner = new String[15];
 
-		// Restore preferences
-		SharedPreferences settings = getActivity().getSharedPreferences(
-				PREFS_NAME, 0);
-		timesToShow = settings.getInt("timesShown", 5);
-		// pd.show();
+	
 
 		StopNameSpinner.setClickable(false);
 		FileRead reader = new FileRead();
 		Resources myResource = getResources();
 		reader.readFromFile(myResource);
-		stops_ = reader.stops_;
 		setUpRoutes();
 		RouteGetter rg = new RouteGetter();
 		rg.execute("http://www.bt4u.org/BT4U_WebService.asmx/GetCurrentRoutes?");
@@ -324,11 +317,10 @@ public class Routes extends SherlockFragment {
 			xpp.setInput(new StringReader(xml));
 			int eventType = xpp.getEventType();
 			String temp = "Arrival Times: \n";
-			SharedPreferences settings = getActivity().getSharedPreferences(
-					PREFS_NAME, 0);
-			timesToShow = settings.getInt("timesShown", 5);
+			SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(Routes.this.getActivity());
+			String times2Show = sharedPref.getString("times", "5");
 			int i = 0;
-			while (i < timesToShow) {
+			while (i < Integer.parseInt(times2Show)) {
 
 				if (eventType == XmlPullParser.START_DOCUMENT) {
 					temp += "";
@@ -352,7 +344,7 @@ public class Routes extends SherlockFragment {
 						arrivals_list_adapter.last().setNote(xpp.getText());
 					}
 				} else if (eventType == XmlPullParser.END_DOCUMENT) {
-					i = timesToShow;
+					i = Integer.parseInt(times2Show);
 				} else if (eventType == XmlPullParser.TEXT) {
 					temp += ("");
 				}
@@ -365,7 +357,6 @@ public class Routes extends SherlockFragment {
 		}
 	}
 
-	private String[] routesActual = null;
 
 	class RouteGetter extends AsyncTask<String, Integer, String> {
 
@@ -684,4 +675,6 @@ public class Routes extends SherlockFragment {
 		super.onInflate(activity, attrs, savedInstanceState);
 		log("onInflate");
 	}
+	
+	
 }
