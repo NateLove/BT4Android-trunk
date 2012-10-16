@@ -16,4 +16,8 @@ public class ScheduledStop {
 
 	@XStreamAlias("StopName")
 	public String stopName;
+	
+	public String getStopCode() {
+		return Integer.toString(stopCode);
+	}
 }
