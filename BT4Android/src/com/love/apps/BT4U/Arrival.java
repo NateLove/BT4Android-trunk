@@ -4,8 +4,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import android.util.Log;
-
 public class Arrival {
 	
 	Date arrivalTime;

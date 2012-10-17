@@ -24,6 +24,7 @@ local.properties
 .classpath
 .settings
 .checkstyle
+.metadata
 
 #IntelliJ IDEA
 .idea
