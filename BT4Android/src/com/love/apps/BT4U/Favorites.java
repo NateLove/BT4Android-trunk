@@ -1,9 +1,13 @@
 package com.love.apps.BT4U;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,12 +49,12 @@ public class Favorites extends SherlockListFragment {
 	private boolean longClick_ = false; // used to tell the gui if click was
 										// long click or short click
 	ArrayAdapter<String> adapter_ = null; // holds list for listview
-	static Map<Integer, stops> favorites_ = new HashMap<Integer, stops>();// holds
-																			// all
-																			// data
-																			// for
-																			// each
-																			// favorite
+	static Map<Integer, FavoriteStop> favorites_ = new HashMap<Integer, FavoriteStop>();// holds
+	// all
+	// data
+	// for
+	// each
+	// favorite
 	AlertDialog.Builder alert = null; // pop window
 	public static final String PREFS_NAME = "MyPrefsFile";
 	static private Favorites favs = null;
@@ -72,7 +76,8 @@ public class Favorites extends SherlockListFragment {
 		super.onActivityCreated(savedInstanceState);
 		setHasOptionsMenu(true);
 		currActivity = this;
-		favorites_.put(0, new stops());
+		favorites_.put(0, new FavoriteStop());
+
 		this.getActivity()
 				.getWindow()
 				.setSoftInputMode(
@@ -80,7 +85,7 @@ public class Favorites extends SherlockListFragment {
 		boolean isSDpresent = android.os.Environment.getExternalStorageState()
 				.equals(android.os.Environment.MEDIA_MOUNTED);
 		if (isSDpresent) {
-			updateFavorites();
+			updateFavorites(getActivity());
 		}
 
 		if (Items == (null)) {
@@ -137,10 +142,10 @@ public class Favorites extends SherlockListFragment {
 	}
 
 	// shows the stop times in new window for giiven stop
-	private void showDialog(stops s) {
+	private void showDialog(FavoriteStop s) {
 		if (favorites_.isEmpty())
 			return;
-		
+
 		alert = new AlertDialog.Builder(currActivity.getActivity());
 		TimeGetter tg = new TimeGetter();
 		tg.execute(s.shortRoute, s.stopCode);
@@ -154,11 +159,11 @@ public class Favorites extends SherlockListFragment {
 
 	// shows remove dialog for given stop
 	private AlertDialog.Builder getRemoveDialog(
-			final Map<Integer, stops> favorites, final int index) {
+			final Map<Integer, FavoriteStop> favorites, final int index) {
 		AlertDialog.Builder alert = new AlertDialog.Builder(
 				currActivity.getActivity());
 		alert.setTitle("Remove Favorite");
-		alert.setMessage("would you like to remove this stop" + "?");
+		alert.setMessage("would you like to remove this stop?");
 
 		// Set an EditText view to get user input
 		alert.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -169,45 +174,41 @@ public class Favorites extends SherlockListFragment {
 				Object[] keys = favorites.keySet().toArray();
 				String fileData = "";
 				for (int i = 0; i < favorites.size(); i++) {
-					stops temp = favorites.get(keys[i]);
+					FavoriteStop temp = favorites.get(keys[i]);
 					fileData += temp.name + "," + temp.shortRoute + ","
 							+ temp.location + "," + temp.stopCode + "\n";
 				}
-				boolean isSDpresent = android.os.Environment
-						.getExternalStorageState().equals(
-								android.os.Environment.MEDIA_MOUNTED);
-				if (isSDpresent) {
-					String path = Environment.getExternalStorageDirectory()
-							+ "/BT4U/";
-					File root = new File(path);
-					root.mkdirs();
 
-					try {
-						File f = new File(root, "favorites.txt");
-						if (!f.exists()) {
-							FileOutputStream fos;
-							fos = new FileOutputStream(f);
-							fos.close();
-						}
-						FileWriter writer;
-						writer = new FileWriter(f);
-						writer.write(fileData);
-						writer.close();
-
-						FileOutputStream fos = Favorites.this.getActivity()
-								.openFileOutput("favorites.txt",
-										Context.MODE_PRIVATE);
-						fos.write(fileData.getBytes());
-						fos.close();
-
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-
-					updateFavorites();
-					updateAdapter(currActivity.getActivity());
-					makeToast("Stop was removed");
+				File storage = getOrCreateFavoritesStorage(getActivity());
+				if (storage == null) {
+					Toast.makeText(getActivity(),
+							"Unable to load favorites. Is your SD card busy?",
+							Toast.LENGTH_LONG).show();
+					return;
 				}
+
+				/*
+				 * FileWriter writer = null; try { writer = new
+				 * FileWriter(storage); writer.write(fileData); } catch
+				 * (IOException e) { e.printStackTrace(); } finally { try {
+				 * writer.close(); } catch (IOException e) {
+				 * e.printStackTrace(); } }
+				 */
+
+				FileOutputStream fos = null;
+				try {
+					fos = new FileOutputStream(storage);
+					fos.write(fileData.getBytes());
+					fos.close();
+				} catch (FileNotFoundException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+				updateFavorites(getActivity());
+				updateAdapter(currActivity.getActivity());
+				makeToast("Stop was removed");
 			}
 
 		});
@@ -221,6 +222,35 @@ public class Favorites extends SherlockListFragment {
 		return alert;
 	}
 
+	/**
+	 * 
+	 * @return null if an error occurs, such as the SD card not being present.
+	 *         Otherwise returns a write-ready file that can be wrappered with
+	 *         something like {@link FileOutputStream}
+	 */
+	// Due to a bug in Froyo (see
+	// https://groups.google.com/forum/?fromgroups=#!topic/android-developers/to1AsfE-Et8)
+	// the app files (e.g. favorites list) will be deleted when a user updates
+	// the application. It's hard to tell what devices this affects, but it
+	// will not affect pushing this application version out, because we are
+	// moving from the old (non proper) storage scheme. Version after this may
+	// encounter the issue.
+	public static File getOrCreateFavoritesStorage(Context c) {
+		File directory = c.getExternalFilesDir(null);
+		if (directory == null) {
+			log("External storage not available");
+			return null;
+		}
+		File favs = new File(directory, "favorites.txt");
+		try {
+			favs.createNewFile();
+		} catch (IOException e) {
+			log("Unable to create new favorite file");
+			e.printStackTrace();
+		}
+		return favs;
+	}
+
 	// class for holding stop information
 	// refreshes the items list
 	private static void refreshItems() {
@@ -228,7 +258,7 @@ public class Favorites extends SherlockListFragment {
 			return;
 		Items = new String[favorites_.size()];
 		for (int i = 0; i < favorites_.size(); i++) {
-			stops temp = favorites_.get(i);
+			FavoriteStop temp = favorites_.get(i);
 			Items[i] = "Route: " + temp.name + "\nLocation:"
 					+ temp.location.split("-")[1] + "\nStop Code: "
 					+ temp.stopCode;
@@ -243,14 +273,21 @@ public class Favorites extends SherlockListFragment {
 	}
 
 	// updates entire favorites list
-	public void updateFavorites() {
-		Log.i("Favorites", "updating favorites");
+	public void updateFavorites(Context c) {
+		log("Updating favorites");
 
 		try {
-			BufferedReader br = new BufferedReader(new InputStreamReader(this
-					.getActivity().openFileInput("favorites.txt"), "UTF-8"));
-			
-			String strLine ="";;
+			File favs = getOrCreateFavoritesStorage(c);
+			if (favs == null) {
+				log("Unable to update favorites");
+				return;
+			}
+
+			BufferedReader br = new BufferedReader(new InputStreamReader(
+					new FileInputStream(favs)));
+
+			String strLine = "";
+
 			// Read File Line By Line
 			int i = 0;
 			favorites_.clear();
@@ -258,23 +295,26 @@ public class Favorites extends SherlockListFragment {
 				// Print the content on the console
 				// String[] allWords;
 				StringTokenizer st = new StringTokenizer(strLine, ",");
-				stops temp = new stops();
-				temp.name = st.nextToken();
-				temp.shortRoute = st.nextToken();
-				temp.location = st.nextToken();
-				temp.stopCode = st.nextToken();
-				favorites_.put(i, temp);
+				FavoriteStop stop = new FavoriteStop();
+				stop.name = st.nextToken();
+				stop.shortRoute = st.nextToken();
+				stop.location = st.nextToken();
+				stop.stopCode = st.nextToken();
+				favorites_.put(i, stop);
 				i++;
 			}
 			br.close();
-		} catch (Exception e) {// Catch exception if any
+			refreshItems();
+
+		} catch (FileNotFoundException fnf) {
+			log("Favorites storage file not found");
+		} catch (Exception e) {
+			log("Unknown exception when updating favorites: " + e.getMessage());
 			e.printStackTrace();
 		}
 
-		refreshItems();
+	}
 
-	}	
-	
 	class TimeGetter extends AsyncTask<Object, Void, List<Arrival>> {
 
 		/**
@@ -321,19 +361,25 @@ public class Favorites extends SherlockListFragment {
 		protected void onPostExecute(List<Arrival> stops) {
 
 			try {
-				
-				SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(Favorites.this.getActivity());
+
+				SharedPreferences sharedPref = PreferenceManager
+						.getDefaultSharedPreferences(Favorites.this
+								.getActivity());
 				int times2Show = sharedPref.getInt("times", 5);
-				
+
 				StringBuffer buffer = new StringBuffer("");
 				int i = 0;
 				for (Arrival a : stops) {
-					if (i++ > times2Show) 
+					if (i++ > times2Show)
 						break;
-					
-					buffer.append(a.timeUntil()).append(" ").append(a.note);
+
+					buffer.append(a.getTime()).append(" - ")
+							.append(a.timeUntil());
+					if (a.note.length() != 0)
+						buffer.append(" *").append(a.note);
+					buffer.append("\n");
 				}
-								
+
 				alert.setTitle("Next Stop Times");
 				alert.setMessage(buffer.toString());
 
@@ -352,9 +398,8 @@ public class Favorites extends SherlockListFragment {
 			}
 		}
 	}
-	
 
-	static class stops {
+	static class FavoriteStop {
 		public String name = null;
 		public String location = null;
 		public String stopCode = null;
@@ -392,9 +437,113 @@ public class Favorites extends SherlockListFragment {
 		setListAdapter(adapter_);
 		log("OnResume");
 	}
-	
+
 	private static void log(String message) {
 		Log.i("Favorites", message);
+	}
+
+	public static void addStopToFavorites(Context c, String routeName,
+			String routeCode, String stopName, String stopCode) {
+
+		File favs = Favorites.getOrCreateFavoritesStorage(c);
+		if (favs == null) {
+			Toast.makeText(c,
+					"Unable to access favorites. Is your SD card available?",
+					Toast.LENGTH_LONG).show();
+			return;
+		}
+
+		String yourdata = routeName + "," + routeCode + "," + stopName + ","
+				+ stopCode + "\n";
+
+		BufferedOutputStream output;
+		try {
+			output = new BufferedOutputStream(new FileOutputStream(favs, true));
+			output.write(yourdata.getBytes());
+			output.close();
+
+		} catch (FileNotFoundException e) {
+			log("Unable to find the favorites");
+			e.printStackTrace();
+			Toast.makeText(c, "Error: Unable to access favorites",
+					Toast.LENGTH_SHORT).show();
+			return;
+		} catch (IOException e) {
+			log("Unable to write favorites");
+			e.printStackTrace();
+			Toast.makeText(c, "Error: Unable to access favorites",
+					Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+		Toast.makeText(c, "Saved to Favorites", Toast.LENGTH_SHORT).show();
+
+	}
+
+	public static void checkForOldFavorites(Context c) {
+		boolean isSDpresent = android.os.Environment.getExternalStorageState()
+				.equals(android.os.Environment.MEDIA_MOUNTED);
+		if (isSDpresent) {
+
+			String path = Environment.getExternalStorageDirectory() + "/BT4U/";
+			File root = new File(path);
+			File f = new File(root, "favorites.txt");
+			if (!f.exists()) {
+				log("Old favorites not found");
+				return;
+			}
+
+			log("Old Favorite file found, migrating contents");
+
+			// Copy old favorites content
+			String content = "";
+			FileReader r;
+			try {
+				r = new FileReader(f);
+
+				c.openFileOutput("favorites.txt", Context.MODE_APPEND);
+				BufferedReader br = new BufferedReader(r);
+				String line = null;
+				while ((line = br.readLine()) != null) {
+					content += line;
+					content += "\n";
+				}
+				br.close();
+			} catch (FileNotFoundException e) {
+				log("Unable to load the old favorites file. Aborting");
+				e.printStackTrace();
+				return;
+			} catch (IOException e) {
+				log("Unable to read the old favorites file. Aborting");
+				e.printStackTrace();
+				return;
+			}
+
+			// Write new file before deleting old one
+			File favs = getOrCreateFavoritesStorage(c);
+			if (favs == null) {
+				log("Unable to get a handle on new favorites file, aborting");
+				return;
+			}
+			BufferedOutputStream output;
+			try {
+				output = new BufferedOutputStream(new FileOutputStream(favs));
+				output.write(content.getBytes());
+				output.close();
+			} catch (FileNotFoundException e) {
+				log("Unable to load the new favorites file. Aborting");
+				e.printStackTrace();
+				return;
+			} catch (IOException e) {
+				log("Unable to write the new favorites file. Aborting");
+				e.printStackTrace();
+				return;
+			}
+			log("Migration of contents successful");
+
+			log("Deleting old favorites.txt: " + f.delete());
+			log("Deleting BT4U folder: " + root.delete());
+		}
 	}
 
 }

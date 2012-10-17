@@ -1,9 +1,6 @@
 package com.love.apps.BT4U;
 
-import java.io.BufferedReader;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +13,6 @@ import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -33,7 +29,6 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
@@ -433,45 +428,46 @@ public class Routes extends SherlockFragment {
 
 		switch (item.getItemId()) {
 		case addID:
-			log("add button");
+			log("Adding stop to favorites");
 			if (RouteInfoSpinner.getSelectedItem().equals("---Select---")
 					|| StopNameSpinner.getSelectedItem().equals("---Select---")) {
 				return true;
 			}
 
-			try {
+			/*
+			 * try {
+			 * 
+			 * String content = ""; File favs =
+			 * Favorites.getOrCreateFavoritesStorage(getActivity()); if (favs ==
+			 * null) { Toast.makeText( getActivity(),
+			 * "Unable to access favorites. Is your SD card available?",
+			 * Toast.LENGTH_LONG).show(); return true; }
+			 * 
+			 * BufferedReader br = new BufferedReader(new InputStreamReader( new
+			 * FileInputStream(favs))); String line = null; while ((line =
+			 * br.readLine()) != null) { content += line; content += "\n"; }
+			 * 
+			 * String yourdata = content + RouteInfoSpinner.getSelectedItem() +
+			 * "," + routes_.get(RouteInfoSpinner.getSelectedItem() .toString())
+			 * + "," + StopNameSpinner.getSelectedItem() + "," +
+			 * CurrentStops_[StopNameSpinner .getSelectedItemPosition()];
+			 * 
+			 * 
+			 * 
+			 * FileOutputStream fos = Routes.this.getActivity()
+			 * .openFileOutput("favorites.txt", Context.MODE_PRIVATE);
+			 * fos.write(yourdata.getBytes()); fos.close();
+			 * Toast.makeText(this.getActivity(), "Saved to Favorites",
+			 * Toast.LENGTH_SHORT).show(); favorites_.updateFavorites(); } catch
+			 * (IOException e) { e.printStackTrace(); }
+			 */
 
-				String content = "";
-				BufferedReader br = new BufferedReader(new InputStreamReader(
-						Routes.this.getActivity()
-								.openFileInput("favorites.txt"), "UTF-8"));
-				String line = null;
-				while ((line = br.readLine()) != null) {
-					content += line;
-					content += "\n";
-				}
-
-				String yourdata = content
-						+ RouteInfoSpinner.getSelectedItem()
-						+ ","
-						+ routes_.get(RouteInfoSpinner.getSelectedItem()
-								.toString())
-						+ ","
-						+ StopNameSpinner.getSelectedItem()
-						+ ","
-						+ CurrentStops_[StopNameSpinner
-								.getSelectedItemPosition()];
-
-				FileOutputStream fos = Routes.this.getActivity()
-						.openFileOutput("favorites.txt", Context.MODE_PRIVATE);
-				fos.write(yourdata.getBytes());
-				fos.close();
-				Toast.makeText(this.getActivity(), "Saved to Favorites",
-						Toast.LENGTH_SHORT).show();
-				favorites_.updateFavorites();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			Favorites.addStopToFavorites(getActivity(),
+					RouteInfoSpinner.getSelectedItem().toString(),
+					routes_.get(RouteInfoSpinner.getSelectedItem().toString()),
+					StopNameSpinner.getSelectedItem().toString(),
+					CurrentStops_[StopNameSpinner.getSelectedItemPosition()]);
+			favorites_.updateFavorites(getActivity());
 
 			break;
 		case refreshID:
