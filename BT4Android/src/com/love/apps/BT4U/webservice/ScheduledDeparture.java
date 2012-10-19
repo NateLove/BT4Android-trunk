@@ -48,6 +48,7 @@ public class ScheduledDeparture {
 	private String ServiceLevelID;
 	private String BlockID;
 	private String TripID;
+	private String TripPointID;
 	private String TripStartTime;
 
 	protected void cleanup() {
@@ -56,6 +57,7 @@ public class ScheduledDeparture {
 		ServiceLevelID = null;
 		BlockID = null;
 		TripID = null;
+		TripPointID = null;
 		TripStartTime = null;
 	}
 
