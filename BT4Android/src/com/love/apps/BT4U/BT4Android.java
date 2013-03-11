@@ -44,6 +44,8 @@ public class BT4Android extends SherlockFragmentActivity {
 	private 		AdController myController;
 
 	@Override
+        /*On create is used to set up initial fragments and tabs as well 
+       set up minor things such as favorites and analytics*/
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
@@ -74,7 +76,8 @@ public class BT4Android extends SherlockFragmentActivity {
 		}
 
 	}
-
+	
+	/*set up all required info for google analytics*/
 	private void setupGoogleAnalytics() {
 		tracker = GoogleAnalyticsTracker.getInstance();
 		tracker.startNewSession("UA-34219177-1", 10, this);
