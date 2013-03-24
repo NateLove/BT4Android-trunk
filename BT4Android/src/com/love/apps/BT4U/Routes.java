@@ -276,7 +276,7 @@ public class Routes extends SherlockFragment {
 		            }
 		            in.close();
 		            String page = sb.toString();
-		            System.out.println(page);
+		            //System.out.println(page);
 
 		            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		            DocumentBuilder builder = factory.newDocumentBuilder();
@@ -396,7 +396,7 @@ public class Routes extends SherlockFragment {
 		            }
 		            in.close();
 		            String page = sb.toString();
-		            System.out.println("HERE IS STOPGETTER RESPONSE\n\n" + page);
+		            //System.out.println("HERE IS STOPGETTER RESPONSE\n\n" + page);
 
 		            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		            DocumentBuilder builder = factory.newDocumentBuilder();
@@ -520,7 +520,7 @@ public class Routes extends SherlockFragment {
 		            }
 		            in.close();
 		            String page = sb.toString();
-		            System.out.println("HERE IS Time Getter Response\n\n" + page);
+		            //System.out.println("HERE IS Time Getter Response\n\n" + page);
 
 		            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		            DocumentBuilder builder = factory.newDocumentBuilder();
@@ -565,7 +565,7 @@ public class Routes extends SherlockFragment {
 
 			SharedPreferences sharedPref = PreferenceManager
 					.getDefaultSharedPreferences(Routes.this.getActivity());
-			int timesToShow = sharedPref.getInt("times", 5);
+			int timesToShow = Integer.parseInt(sharedPref.getString("timesToShow", "5"));
 
 			int i = 0;
 			List<Arrival> result = new ArrayList<Arrival>();

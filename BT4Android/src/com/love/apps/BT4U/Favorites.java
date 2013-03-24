@@ -379,7 +379,7 @@ public class Favorites extends SherlockListFragment {
 		            }
 		            in.close();
 		            String page = sb.toString();
-		            System.out.println("HERE IS Time Getter Response\n\n" + page);
+		            //System.out.println("HERE IS Time Getter Response\n\n" + page);
 
 		            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		            DocumentBuilder builder = factory.newDocumentBuilder();
@@ -424,7 +424,7 @@ public class Favorites extends SherlockListFragment {
 
 			SharedPreferences sharedPref = PreferenceManager
 					.getDefaultSharedPreferences(Favorites.this.getActivity());
-			int timesToShow = sharedPref.getInt("times", 5);
+			int timesToShow = Integer.parseInt(sharedPref.getString("timesToShow", "5"));
 
 			int i = 0;
 			List<Arrival> result = new ArrayList<Arrival>();
@@ -447,7 +447,7 @@ public class Favorites extends SherlockListFragment {
 				SharedPreferences sharedPref = PreferenceManager
 						.getDefaultSharedPreferences(Favorites.this
 								.getActivity());
-				int times2Show = sharedPref.getInt("times", 5);
+				int times2Show = Integer.parseInt(sharedPref.getString("timesToShow", "5"));
 
 				StringBuffer buffer = new StringBuffer("");
 				int i = 0;

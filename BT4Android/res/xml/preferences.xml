@@ -17,7 +17,7 @@
         android:enabled="true"
         android:entries="@array/timesToShowArray"
         android:entryValues="@array/timesToShowValues"
-        android:key="times"
+        android:key="timesToShow"
         android:summary="Select how many times will be displayed "
         android:title="Stop Times to Show" />
 

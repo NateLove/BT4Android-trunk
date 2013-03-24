@@ -49,6 +49,8 @@ public class Updates extends SherlockFragment
 	 
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {		
+		
+		//System.out.println(" HEY I MADE IT");
 		super.onCreateView(inflater, container, savedInstanceState);
 		setHasOptionsMenu(true);
 
@@ -79,6 +81,7 @@ public class Updates extends SherlockFragment
 					buff.append(line+"\n");
 				}
 				bin.close();	
+				//System.out.println(buff.toString());
 				return buff.toString();
 
 			} catch (Exception e) {

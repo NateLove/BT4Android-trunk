@@ -5,6 +5,10 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
+import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.Toast;
 
 public class SettingsActivity extends PreferenceActivity {
@@ -30,8 +34,10 @@ public class SettingsActivity extends PreferenceActivity {
 		BT4Android.getTracker().dispatch();
 		// Restore preferences
 		SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-		timesToShow = settings.getInt("timesShown", 5);
+		//timesToShow = settings.getInt("timesShown", 5);
+		int timesToShow = Integer.parseInt(settings.getString("timesToShow", "5"));
 		defaultTab = settings.getInt("defaultTab", 0);
+		Log.d("SettingsActivity.java", "The old Times to Show is " + timesToShow);
 		//
 		// TextView tabs = (TextView) findViewById(R.id.default_tab);
 		// TextView times = (TextView) findViewById(R.id.time_settings);
@@ -67,6 +73,8 @@ public class SettingsActivity extends PreferenceActivity {
 	}
 
 	public void refreshTimes() {
+		Log.d("SettingsActivity.java", "This never happens");
+
 		final String[] items = { "1", "3", "5", "All" };
 
 		String current = Integer.toString(timesToShow);
@@ -110,12 +118,31 @@ public class SettingsActivity extends PreferenceActivity {
 				SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
 				SharedPreferences.Editor editor = settings.edit();
 				editor.putInt("timesShown", timesToShow);
+				Log.d("SettingsActivity.java", "The new Times to Show is " + timesToShow);
 
 				// Commit the edits!
 				editor.commit();
 
 			}
 		});
+		builder.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> arg0, View arg1,
+					int arg2, long arg3) {
+				// TODO Auto-generated method stub
+				Log.d("SettingsActivity.java", "You have selected " + arg2);
+
+				
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
 		builder.show();
 
 	}
