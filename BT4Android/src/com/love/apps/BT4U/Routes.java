@@ -1,12 +1,30 @@
 package com.love.apps.BT4U;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.StringReader;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -189,7 +207,8 @@ public class Routes extends SherlockFragment {
 		routes_.put("CRC - Corporate Research Center", "CRC");
 		routes_.put("UCB - University City Boulevard", "UCB");
 		routes_.put("BTC - BT Commuter Service", "BTC");
-		routes_.put("TE - Tuesday Route", "TE");
+		routes_.put("TE - The Explorer", "TE");
+		routes_.put("CRCH - Corporate Research Center/Hospital", "CRCH");
 
 		routeCodeToName.put("MSN", "Main Street Northbound");
 		routeCodeToName.put("MSS", "Main Street Southbound");
@@ -204,7 +223,9 @@ public class Routes extends SherlockFragment {
 		routeCodeToName.put("CRC", "Corporate Research Center");
 		routeCodeToName.put("UCB", "University City Boulevard");
 		routeCodeToName.put("BTC", "BT Commuter Service");
-		routeCodeToName.put("TE", "Tuesday Route");
+		routeCodeToName.put("TE", "The Explorer");
+		routeCodeToName.put("CRCH", "Corporate Research Center/Hospital");
+
 
 	}
 
@@ -237,7 +258,61 @@ public class Routes extends SherlockFragment {
 
 		@Override
 		protected List<String> doInBackground(Void... params) {
-			return BT4U.getService().getActiveRouteCodes();
+			List<String> currentRoutes = new ArrayList<String>();
+
+			 BufferedReader in = null;
+		        try {
+		            HttpClient client = new DefaultHttpClient();
+		            HttpGet request = new HttpGet();
+		            request.setURI(new URI("http://www.bt4u.org/webservices/bt4u_webservice.asmx/GetCurrentRoutes"));
+		            HttpResponse response = client.execute(request);
+		            in = new BufferedReader
+		            (new InputStreamReader(response.getEntity().getContent()));
+		            StringBuffer sb = new StringBuffer("");
+		            String line = "";
+		            String NL = System.getProperty("line.separator");
+		            while ((line = in.readLine()) != null) {
+		                sb.append(line + NL);
+		            }
+		            in.close();
+		            String page = sb.toString();
+		            System.out.println(page);
+
+		            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		            DocumentBuilder builder = factory.newDocumentBuilder();
+
+		            InputSource is = new InputSource(new StringReader(page));
+		            Document doc = builder.parse(is);
+
+		            NodeList currentRoutesRunning = doc.getElementsByTagName("CurrentRoutes");
+		            log("Number of nodes: " + currentRoutesRunning.getLength());
+		            for (int i = 0; i < currentRoutesRunning.getLength(); ++i)
+		            {
+
+		            	//log("Node Value: " + ((Element) currentRoutesRunning.item(i)).getElementsByTagName("RouteShortName").item(0).getNodeValue());
+		                Element currentRoute = (Element) currentRoutesRunning.item(i);
+		                //String labTestType = currentRoute.getAttribute("RouteShortName");
+
+		                Element routeShortName = (Element) (currentRoute.getElementsByTagName("RouteShortName").item(0));
+		                log("Node Value: " + routeShortName.getFirstChild().getNodeValue());
+		                currentRoutes.add(routeShortName.getFirstChild().getNodeValue());
+
+
+		            }
+		            } catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+
+					} finally {
+		            if (in != null) {
+		                try {
+		                    in.close();
+		                    } catch (IOException e) {
+		                    e.printStackTrace();
+		                }
+		            }
+		        }
+				return currentRoutes;
 		}
 
 		@Override
@@ -297,7 +372,74 @@ public class Routes extends SherlockFragment {
 
 		@Override
 		protected List<ScheduledStop> doInBackground(String... routeCode) {
-			return BT4U.getService().getScheduledStopsForRoute(routeCode[0]);
+			List<ScheduledStop> currentStops = new ArrayList<ScheduledStop>();
+
+			 BufferedReader in = null;
+		        try {
+		            HttpClient client = new DefaultHttpClient();
+		            //HttpGet request = new HttpGet();
+		            HttpPost request = new HttpPost();
+		            request.setURI(new URI("http://www.bt4u.org/webservices/bt4u_webservice.asmx/GetScheduledStopNames"));
+
+		            ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
+		            params.add(new BasicNameValuePair("routeShortName", routeCode[0]));
+		            UrlEncodedFormEntity formEntity = new UrlEncodedFormEntity(params);
+		            request.setEntity(formEntity);
+		            HttpResponse response = client.execute(request);
+		            in = new BufferedReader
+		            (new InputStreamReader(response.getEntity().getContent()));
+		            StringBuffer sb = new StringBuffer("");
+		            String line = "";
+		            String NL = System.getProperty("line.separator");
+		            while ((line = in.readLine()) != null) {
+		                sb.append(line + NL);
+		            }
+		            in.close();
+		            String page = sb.toString();
+		            System.out.println("HERE IS STOPGETTER RESPONSE\n\n" + page);
+
+		            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		            DocumentBuilder builder = factory.newDocumentBuilder();
+
+		            InputSource is = new InputSource(new StringReader(page));
+		            Document doc = builder.parse(is);
+
+		            NodeList currentRoutesRunning = doc.getElementsByTagName("ScheduledStops");
+		            log("Number of nodes in StopGetter: " + currentRoutesRunning.getLength());
+		            for (int i = 0; i < currentRoutesRunning.getLength(); ++i)
+		            {
+
+		            	//log("Node Value: " + ((Element) currentRoutesRunning.item(i)).getElementsByTagName("RouteShortName").item(0).getNodeValue());
+		                Element currentRoute = (Element) currentRoutesRunning.item(i);
+		                //String labTestType = currentRoute.getAttribute("RouteShortName");
+
+		                Element stopName = (Element) (currentRoute.getElementsByTagName("StopName").item(0));
+		                Element stopCode = (Element) (currentRoute.getElementsByTagName("StopCode").item(0));
+		                log( "StopName: " + stopName + " StopCode: " + stopCode);
+		                String stopNameString = stopName.getFirstChild().getNodeValue();
+		                String stopCodeString = stopCode.getFirstChild().getNodeValue();
+
+		                ScheduledStop newStop = new ScheduledStop();
+		                newStop.setStopCode(Integer.parseInt(stopCodeString));
+		                newStop.setStopName(stopNameString);
+		                currentStops.add(newStop);
+
+
+		            }
+		            } catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+
+					} finally {
+		            if (in != null) {
+		                try {
+		                    in.close();
+		                    } catch (IOException e) {
+		                    e.printStackTrace();
+		                }
+		            }
+		        }
+				return currentStops;
 		}
 
 		@Override
@@ -351,10 +493,74 @@ public class Routes extends SherlockFragment {
 				return new ArrayList<Arrival>();
 			}
 
-			List<ScheduledDeparture> departures = BT4U.getService()
-					.getScheduledDeparturesFromStop(routeCode, stopCode);
+			///New Stuff Here
 
-			if (departures.size() == 0)
+			List<Arrival> AdjustedDepartureTimes = new ArrayList<Arrival>();
+
+			 BufferedReader in = null;
+		        try {
+		            HttpClient client = new DefaultHttpClient();
+		            //HttpGet request = new HttpGet();
+		            HttpPost request = new HttpPost();
+		            request.setURI(new URI("http://www.bt4u.org/webservices/bt4u_webservice.asmx/GetNextDepartures"));
+
+		            ArrayList<NameValuePair> params1 = new ArrayList<NameValuePair>();
+		            params1.add(new BasicNameValuePair("routeShortName", routeCode));
+		            params1.add(new BasicNameValuePair("stopCode", (String) params[1]));
+		            UrlEncodedFormEntity formEntity = new UrlEncodedFormEntity(params1);
+		            request.setEntity(formEntity);
+		            HttpResponse response = client.execute(request);
+		            in = new BufferedReader
+		            (new InputStreamReader(response.getEntity().getContent()));
+		            StringBuffer sb = new StringBuffer("");
+		            String line = "";
+		            String NL = System.getProperty("line.separator");
+		            while ((line = in.readLine()) != null) {
+		                sb.append(line + NL);
+		            }
+		            in.close();
+		            String page = sb.toString();
+		            System.out.println("HERE IS Time Getter Response\n\n" + page);
+
+		            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		            DocumentBuilder builder = factory.newDocumentBuilder();
+
+		            InputSource is = new InputSource(new StringReader(page));
+		            Document doc = builder.parse(is);
+
+		            NodeList currentRoutesRunning = doc.getElementsByTagName("NextDepartures");
+		            log("Number of nodes in TimeGetter: " + currentRoutesRunning.getLength());
+		            for (int i = 0; i < currentRoutesRunning.getLength(); ++i)
+		            {
+
+		            	//log("Node Value: " + ((Element) currentRoutesRunning.item(i)).getElementsByTagName("RouteShortName").item(0).getNodeValue());
+		                Element currentRoute = (Element) currentRoutesRunning.item(i);
+		                //String labTestType = currentRoute.getAttribute("RouteShortName");
+
+		                Element AdjustedDepartureTime = (Element) (currentRoute.getElementsByTagName("AdjustedDepartureTime").item(0));
+		                String AdjustedDepartureTimeString = AdjustedDepartureTime.getFirstChild().getNodeValue();
+
+		                Arrival tempArrival = new Arrival(AdjustedDepartureTimeString);
+		                AdjustedDepartureTimes.add(tempArrival);
+
+
+
+		            }
+		            } catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+
+					} finally {
+		            if (in != null) {
+		                try {
+		                    in.close();
+		                    } catch (IOException e) {
+		                    e.printStackTrace();
+		                }
+		            }
+		        }
+			//END
+			if (AdjustedDepartureTimes.size() == 0)
 				return new ArrayList<Arrival>();
 
 			SharedPreferences sharedPref = PreferenceManager
@@ -363,11 +569,11 @@ public class Routes extends SherlockFragment {
 
 			int i = 0;
 			List<Arrival> result = new ArrayList<Arrival>();
-			for (ScheduledDeparture departure : departures) {
+			for (Arrival arrival : AdjustedDepartureTimes) {
 				if (i++ > timesToShow)
 					break;
 
-				Arrival a = new Arrival(departure.departureTime);
+				Arrival a = arrival;
 				result.add(a);
 			}
 
@@ -436,24 +642,24 @@ public class Routes extends SherlockFragment {
 
 			/*
 			 * try {
-			 * 
+			 *
 			 * String content = ""; File favs =
 			 * Favorites.getOrCreateFavoritesStorage(getActivity()); if (favs ==
 			 * null) { Toast.makeText( getActivity(),
 			 * "Unable to access favorites. Is your SD card available?",
 			 * Toast.LENGTH_LONG).show(); return true; }
-			 * 
+			 *
 			 * BufferedReader br = new BufferedReader(new InputStreamReader( new
 			 * FileInputStream(favs))); String line = null; while ((line =
 			 * br.readLine()) != null) { content += line; content += "\n"; }
-			 * 
+			 *
 			 * String yourdata = content + RouteInfoSpinner.getSelectedItem() +
 			 * "," + routes_.get(RouteInfoSpinner.getSelectedItem() .toString())
 			 * + "," + StopNameSpinner.getSelectedItem() + "," +
 			 * CurrentStops_[StopNameSpinner .getSelectedItemPosition()];
-			 * 
-			 * 
-			 * 
+			 *
+			 *
+			 *
 			 * FileOutputStream fos = Routes.this.getActivity()
 			 * .openFileOutput("favorites.txt", Context.MODE_PRIVATE);
 			 * fos.write(yourdata.getBytes()); fos.close();

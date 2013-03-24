@@ -44,7 +44,7 @@ class RouteBuilder {
 
 		Collections.sort(points, new Comparator<Point>() {
 
-			@Override
+			
 			public int compare(Point lhs, Point rhs) {
 				if (lhs.rank < rhs.rank)
 					return -1;

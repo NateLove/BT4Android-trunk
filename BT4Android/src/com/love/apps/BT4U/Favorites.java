@@ -9,11 +9,28 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -223,7 +240,7 @@ public class Favorites extends SherlockListFragment {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return null if an error occurs, such as the SD card not being present.
 	 *         Otherwise returns a write-ready file that can be wrappered with
 	 *         something like {@link FileOutputStream}
@@ -317,6 +334,7 @@ public class Favorites extends SherlockListFragment {
 
 	class TimeGetter extends AsyncTask<Object, Void, List<Arrival>> {
 
+
 		/**
 		 * Our @link TimeGetter requires two parameters. params[0] should be the
 		 * route code, such as HWD, and params[1] should be the stop code, such
@@ -334,10 +352,74 @@ public class Favorites extends SherlockListFragment {
 				return new ArrayList<Arrival>();
 			}
 
-			List<ScheduledDeparture> departures = BT4U.getService()
-					.getScheduledDeparturesFromStop(routeCode, stopCode);
+			///New Stuff Here
 
-			if (departures.size() == 0)
+			List<Arrival> AdjustedDepartureTimes = new ArrayList<Arrival>();
+
+			 BufferedReader in = null;
+		        try {
+		            HttpClient client = new DefaultHttpClient();
+		            //HttpGet request = new HttpGet();
+		            HttpPost request = new HttpPost();
+		            request.setURI(new URI("http://www.bt4u.org/webservices/bt4u_webservice.asmx/GetNextDepartures"));
+
+		            ArrayList<NameValuePair> params1 = new ArrayList<NameValuePair>();
+		            params1.add(new BasicNameValuePair("routeShortName", routeCode));
+		            params1.add(new BasicNameValuePair("stopCode", (String) params[1]));
+		            UrlEncodedFormEntity formEntity = new UrlEncodedFormEntity(params1);
+		            request.setEntity(formEntity);
+		            HttpResponse response = client.execute(request);
+		            in = new BufferedReader
+		            (new InputStreamReader(response.getEntity().getContent()));
+		            StringBuffer sb = new StringBuffer("");
+		            String line = "";
+		            String NL = System.getProperty("line.separator");
+		            while ((line = in.readLine()) != null) {
+		                sb.append(line + NL);
+		            }
+		            in.close();
+		            String page = sb.toString();
+		            System.out.println("HERE IS Time Getter Response\n\n" + page);
+
+		            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		            DocumentBuilder builder = factory.newDocumentBuilder();
+
+		            InputSource is = new InputSource(new StringReader(page));
+		            Document doc = builder.parse(is);
+
+		            NodeList currentRoutesRunning = doc.getElementsByTagName("NextDepartures");
+		            log("Number of nodes in TimeGetter: " + currentRoutesRunning.getLength());
+		            for (int i = 0; i < currentRoutesRunning.getLength(); ++i)
+		            {
+
+		            	//log("Node Value: " + ((Element) currentRoutesRunning.item(i)).getElementsByTagName("RouteShortName").item(0).getNodeValue());
+		                Element currentRoute = (Element) currentRoutesRunning.item(i);
+		                //String labTestType = currentRoute.getAttribute("RouteShortName");
+
+		                Element AdjustedDepartureTime = (Element) (currentRoute.getElementsByTagName("AdjustedDepartureTime").item(0));
+		                String AdjustedDepartureTimeString = AdjustedDepartureTime.getFirstChild().getNodeValue();
+
+		                Arrival tempArrival = new Arrival(AdjustedDepartureTimeString);
+		                AdjustedDepartureTimes.add(tempArrival);
+
+
+
+		            }
+		            } catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+
+					} finally {
+		            if (in != null) {
+		                try {
+		                    in.close();
+		                    } catch (IOException e) {
+		                    e.printStackTrace();
+		                }
+		            }
+		        }
+			//END
+			if (AdjustedDepartureTimes.size() == 0)
 				return new ArrayList<Arrival>();
 
 			SharedPreferences sharedPref = PreferenceManager
@@ -346,11 +428,11 @@ public class Favorites extends SherlockListFragment {
 
 			int i = 0;
 			List<Arrival> result = new ArrayList<Arrival>();
-			for (ScheduledDeparture departure : departures) {
+			for (Arrival arrival : AdjustedDepartureTimes) {
 				if (i++ > timesToShow)
 					break;
 
-				Arrival a = new Arrival(departure.departureTime);
+				Arrival a = arrival;
 				result.add(a);
 			}
 
