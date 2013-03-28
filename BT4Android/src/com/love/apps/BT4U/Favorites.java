@@ -37,6 +37,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.DialogInterface.OnClickListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -441,7 +442,12 @@ public class Favorites extends SherlockListFragment {
 
 		@Override
 		protected void onPostExecute(List<Arrival> stops) {
-
+			if(stops.size() == 0)
+			{
+				showNoStopAlert();
+				return;
+			}
+			
 			try {
 
 				SharedPreferences sharedPref = PreferenceManager
@@ -464,6 +470,7 @@ public class Favorites extends SherlockListFragment {
 
 				alert.setTitle("Next Stop Times");
 				alert.setMessage(buffer.toString());
+				
 
 				// Set an EditText view to get user input
 				alert.setPositiveButton("Ok",
@@ -626,6 +633,22 @@ public class Favorites extends SherlockListFragment {
 			log("Deleting old favorites.txt: " + f.delete());
 			log("Deleting BT4U folder: " + root.delete());
 		}
+	}
+	private void showNoStopAlert() {
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(Favorites.this.getActivity());
+		builder.setTitle("No More Scheduled Stops");
+		builder.setMessage("There doesn't seem to be any more scheduled stops here for today" +
+				"\n\nYou may want to start walking...");
+		builder.setPositiveButton("OK", new OnClickListener() {
+			
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		builder.show();
 	}
 
 }

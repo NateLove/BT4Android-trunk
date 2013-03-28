@@ -30,7 +30,10 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -52,8 +55,6 @@ import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
-import com.love.apps.BT4U.webservice.BT4U;
-import com.love.apps.BT4U.webservice.ScheduledDeparture;
 import com.love.apps.BT4U.webservice.ScheduledStop;
 import com.love.qsort.MyQsort;
 
@@ -448,6 +449,7 @@ public class Routes extends SherlockFragment {
 
 			if (stops.size() == 0) {
 				StopNameSpinner.setClickable(false);
+				showNoStopAlert();
 				return;
 			}
 
@@ -471,6 +473,21 @@ public class Routes extends SherlockFragment {
 			StopNameSpinner.setAdapter(adapter2_);
 			StopNameSpinner.setSelected(false);
 
+		}
+		private void showNoStopAlert() {
+
+			AlertDialog.Builder builder = new AlertDialog.Builder(Routes.this.getActivity());
+			builder.setTitle("There Seems to be an Error Fetching the Stops");
+			builder.setMessage("BT4Android was not able to get any stops for this route. ");
+			builder.setPositiveButton("OK", new OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO Auto-generated method stub
+					
+				}
+			});
+			builder.show();
 		}
 	}
 
@@ -587,9 +604,32 @@ public class Routes extends SherlockFragment {
 			// allows us to draw an error message on the screen, such as
 			// ArrivalError
 			arrivals_list_adapter.clear();
+						
+			if(stops.size() == 0)
+			{
+				showNoStopAlert();
+				
+			}
 			for (Arrival a : stops)
 				arrivals_list_adapter.add(a);
 			arrivals_list_adapter.notifyDataSetChanged();
+		}
+
+		private void showNoStopAlert() {
+
+			AlertDialog.Builder builder = new AlertDialog.Builder(Routes.this.getActivity());
+			builder.setTitle("No More Scheduled Stops");
+			builder.setMessage("There doesn't seem to be any more scheduled stops here for today" +
+					"\n\nYou may want to start walking...");
+			builder.setPositiveButton("OK", new OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					// TODO Auto-generated method stub
+					
+				}
+			});
+			builder.show();
 		}
 	}
 
