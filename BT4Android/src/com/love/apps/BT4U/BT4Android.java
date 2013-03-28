@@ -22,6 +22,11 @@ import android.widget.TextView;
 import com.Leadbolt.AdController;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
+import com.parse.GetCallback;
+import com.parse.Parse;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 
 
 
@@ -75,6 +80,24 @@ public class BT4Android extends SherlockFragmentActivity {
 			mTabHost.setCurrentTabByTag(savedInstanceState.getString("tab"));
 		}
 
+		Parse.initialize(this, "2yYQs2ODsrljCxsgvb1062l927eINrYFp968bD3B", "Jmpr3qkovqnfEYJimfK6nRX6aSUDjRrJbisXArK9"); 
+		ParseQuery q = new ParseQuery("BT4UHttpRequestUrls");
+		q.getInBackground("DJAl8sVMSV", new GetCallback() {
+			
+			@Override
+			public void done(ParseObject BT4AndroidUrls, ParseException arg1) {
+				// TODO Auto-generated method stub
+				if( arg1 == null )
+				{
+					System.out.println("Got Parse OBJECT");
+					System.out.println(BT4AndroidUrls.getString("RouteRequestUrl"));
+				
+				}
+				else
+					arg1.printStackTrace();
+				
+			}
+		});
 	}
 	
 	/*set up all required info for google analytics*/
