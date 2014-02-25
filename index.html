@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Bt4android-trunk : Android app for finding times of the Blacksburg Transit System" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Bt4android-trunk</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/NateLove/BT4Android-trunk">View on GitHub</a>
+
+          <h1 id="project_title">Bt4android-trunk</h1>
+          <h2 id="project_tagline">Android app for finding times of the Blacksburg Transit System</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/NateLove/BT4Android-trunk/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/NateLove/BT4Android-trunk/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="bt4android" class="anchor" href="#bt4android"><span class="octicon octicon-link"></span></a>BT4Android</h1>
+
+<p>Android app for finding times of the Blacksburg Transit System</p>
+
+<p>Play Store Link: <a href="https://play.google.com/store/apps/details?id=com.love.apps.BT4U">https://play.google.com/store/apps/details?id=com.love.apps.BT4U</a></p>
+
+<h1>
+<a name="set-up" class="anchor" href="#set-up"><span class="octicon octicon-link"></span></a>Set Up</h1>
+
+<p>This app relies on the ActionBarSherlock Library to use the newer Android 
+style guides for Android versions lower than 3.0.</p>
+
+<p>I use Eclipse, so that is how I set this up. If you want to set it up 
+differently that is up to you, but please don't attempt to push changes to 
+ActionBarSherlock. </p>
+
+<p>1) abs library folder must be located immediately next to the bt4android folder (like they currently are in the github), and symbolic links will not work. This is due to eclipse + ADT bug (see <a href="http://stackoverflow.com/questions/5167273/in-eclipse-unable-to-reference-an-android-library-project-in-another-android-pr%5D%20for%20more">here</a>. The best approach here is to just leave them alone after a checkout, and create a new eclipse workspace right on top of the git repository. E.g.
+$ git clone <a href="mailto:git@github.com">git@github.com</a>:NateLove/BT4Android-trunk.git BT4Android</p>
+
+<p>Then Create a workspace in the BT4Android folder.</p>
+
+<p>2) A bug in eclipse prevents you from importing existing Android projects when they are in a situation like is required for (1). See <a href="http://stackoverflow.com/questions/4054216/opening-existing-project-from-source-control">here</a> for details, but the basic idea is that you have to move the projects, import them to eclipse (to get their information into the .metadata folder), then delete them without removing the contents on disk, then move them back, then import existing projects into workspace and you can select them. Annoying, but here's the whole process (all $ are done in the shell, all # are done in eclipse)</p>
+
+<p>-$ git clone ... BT4Android</p>
+
+<p>-# Open eclipse, create a new workspace on top of BT4Android</p>
+
+<p>-$ cd BT4Android</p>
+
+<p>-$ mv ActionBarSherlockLibrary ~/Desktop</p>
+
+<p>-# Select File-&gt; Import --&gt; Existing Android Code into Workspace</p>
+
+<p>-# Select ~/Desktop/ActionBarSherlockLibrary for import</p>
+
+<p>-# Right click on abs library--&gt;properties: Ensure that Properties--&gt;Android lists at least API 15 and that 'is Library' is checked</p>
+
+<p>-# Ensure Properties--&gt;Java Compiler has compiler compliance level set to 1.6</p>
+
+<p>-# Delete the imported project, but leave contents on disk</p>
+
+<p>-$ mv ~/ActionBarSherlockLibrary .</p>
+
+<p>-# File --&gt; Import --&gt; Existing Projects into Workspace --&gt; Browse to BT4Android and select ActionBarSherlock</p>
+
+<p>Repeat the process (the moving / importing part) for BT4Android</p>
+
+<p>Finally, start hacking....</p>
+
+<p>Any questions, just let me know. <a href="mailto:ngl9789@gmail.com">ngl9789@gmail.com</a></p>
+
+<h1>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h1>
+
+<pre><code>Copyright 2012 Nathan Love
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+</code></pre>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Bt4android-trunk maintained by <a href="https://github.com/NateLove">NateLove</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
